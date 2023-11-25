@@ -10,7 +10,7 @@ A tool to serialize/deserialize several nuccChunkBinary .xfbin's from Ultimate N
 ## Formats
 nuccbin supports a number of in game nuccChunkBinary param / bin formats. All formats support serializing. While some may not support deserializing.
 | File | Serialize | Deserialize | Extension |
-| --- | --- | --- | --- | --- |
+| --- | --- | --- | --- |
 | [accessoryParam](https://github.com/ScanMountGoat/xc3_lib/blob/main/xc3_lib/src/apmd.rs) | ✔️ | ✔️ | `json` |
 | [animeSongBgmParam](https://github.com/ScanMountGoat/xc3_lib/blob/main/xc3_lib/src/bc.rs) | ✔️ | ✔️ | `json` |
 | [characode](https://github.com/ScanMountGoat/xc3_lib/blob/main/xc3_lib/src/dhal.rs) | ✔️ | ✔️  | `json` |
@@ -30,7 +30,7 @@ nuccbin supports a number of in game nuccChunkBinary param / bin formats. All fo
 | [staffRollTextParam](https://github.com/ScanMountGoat/xc3_lib/blob/main/xc3_lib/src/xbc1.rs) | ✔️ | ✔️ | `json` | 
 | [supportActionParam](https://github.com/ScanMountGoat/xc3_lib/blob/main/xc3_lib/src/xbc1.rs) | ✔️ | ✔️ | `json` | 
 | [xml](https://github.com/ScanMountGoat/xc3_lib/blob/main/xc3_lib/src/xbc1.rs) | ✔️ | ✔️ | `xml` | 
-
+\*
 
 ## Credits
 This project is based on the [initial work](https://github.com/SutandoTsukai181/xfbin-nucc-binary) by SutandoTsukai181 on the original nuccChunkBinary parser for the All Star Battle R series.
