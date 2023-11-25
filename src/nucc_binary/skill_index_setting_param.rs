@@ -3,18 +3,21 @@ use serde::{Serialize, Deserialize};
 
 use super::{NuccBinaryParsed, NuccBinaryType};
 
+
+// Format reversed by valant96
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Entry {
     pub characode_index: u32,
 
-    pub unk1: i64,
+    pub first_jutsu_skl_index: i32,
+    pub second_jutsu_skl_index: i32,
 
 }
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
-pub struct SupportActionParam {
+pub struct SkillIndexSettingParam {
     #[serde(skip)]
     pub size: u32,
 
@@ -33,9 +36,9 @@ pub struct SupportActionParam {
     pub entries: Vec<Entry>
 }
 
-impl NuccBinaryParsed for SupportActionParam {
+impl NuccBinaryParsed for SkillIndexSettingParam {
     fn binary_type(&self) -> NuccBinaryType {
-        NuccBinaryType::SupportActionParam
+        NuccBinaryType::SkillIndexSettingParam
     }
 
     fn extension(&self) -> String {

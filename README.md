@@ -27,6 +27,7 @@ nuccbin supports a number of in game nuccChunkBinary param / bin formats. All fo
 | [playerSettingParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/player_setting_param.rs) | ✔️ | ✔️ | `json` | 
 | [player_icon](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/player_icon.rs) | ✔️ | ✔️ | `json` | 
 | [prm_load](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/player_icon.rs) | ✔️ | ✔️ | `json` |
+| [skill_index_setting_param](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/skill_index_setting_param.rs) | ✔️ | ✔️ | `json` |
 | [staffRollTextParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/staff_roll_text_param.rs) | ✔️ | ❌ | `json` | 
 | [supportActionParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/support_action_param.rs) | ✔️ | ✔️ | `json` | 
 | [xml](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/xml.rs) | ✔️ | ✔️ | `xml` | 
@@ -41,4 +42,5 @@ Special thanks goes to several members including:
 * [TheLeonX](https://github.com/TheLeonX) for work on the Character Manager which was used as inspiration and several formats.
 * [PortableProductions](https://www.youtube.com/@PortableProductions) for help on several formats and information.
 * [Kuroha Saenoki](https://www.youtube.com/@KurohaSaenoki) for information on some formats.
+* [Valant96](https://www.youtube.com/@valant96) for information on some formats.
 * and [SutandoTsukai181](https://github.com/SutandoTsukai181) for his initial work on the tool.

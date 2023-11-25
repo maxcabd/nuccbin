@@ -16,6 +16,7 @@ mod player_setting_param;
 mod player_icon;
 mod png;
 mod prm_load;
+mod skill_index_setting_param;
 mod staff_roll_text_param;
 mod support_action_param;  
 mod xml;
@@ -44,6 +45,7 @@ pub use player_setting_param::PlayerSettingParam;
 pub use player_icon::PlayerIcon;
 pub use png::Png;
 pub use prm_load::PrmLoad;
+pub use skill_index_setting_param::SkillIndexSettingParam;
 pub use staff_roll_text_param::StaffRollTextParam;
 pub use support_action_param::SupportActionParam;
 pub use xml::Xml;
@@ -101,6 +103,11 @@ impl From<NuccBinaryParsedReader<'_>> for Box<dyn NuccBinaryParsed> {
             NuccBinaryType::PrmLoad => {
                 let mut prm_load = Cursor::new(data);
                 Box::new(prm_load.read_le::<PrmLoad>().unwrap())
+            }
+
+            NuccBinaryType::SkillIndexSettingParam => {
+                let mut skill_index_setting_param = Cursor::new(data);
+                Box::new(skill_index_setting_param.read_le::<SkillIndexSettingParam>().unwrap())
             }
 
             NuccBinaryType::StaffRollTextParam => Box::new(StaffRollTextParam::from(&data[..])),
@@ -172,6 +179,15 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
                 prm_load.into_inner()
             },
 
+            NuccBinaryType::SkillIndexSettingParam => {
+                let mut skill_index_setting_param = Cursor::new(Vec::new());
+                skill_index_setting_param.write_le(&*boxed.downcast::<SkillIndexSettingParam>().ok().unwrap()).unwrap();
+                
+                skill_index_setting_param.set_position(0);
+                skill_index_setting_param.write_be::<u32>(&((skill_index_setting_param.get_ref().len() - 4) as u32)).unwrap();
+                skill_index_setting_param.into_inner()
+            },
+
             NuccBinaryType::SupportActionParam => {
                 let mut support_action_param = Cursor::new(Vec::new());
                 support_action_param.write_le(&*boxed.downcast::<SupportActionParam>().ok().unwrap()).unwrap();
@@ -222,6 +238,7 @@ impl From<NuccBinaryParsedDeserializer> for Box<dyn NuccBinaryParsed> {
             NuccBinaryType::PlayerIcon => Box::new(PlayerIcon::deserialize(&data)),
             NuccBinaryType::Png => Box::new(Png::deserialize(&data)),
             NuccBinaryType::PrmLoad => Box::new(PrmLoad::deserialize(&data)),
+            NuccBinaryType::SkillIndexSettingParam => Box::new(SkillIndexSettingParam::deserialize(&data)),
             NuccBinaryType::StaffRollTextParam => Box::new(StaffRollTextParam::deserialize(&data)),
             NuccBinaryType::SupportActionParam => Box::new(SupportActionParam::deserialize(&data)),
             NuccBinaryType::Xml => Box::new(Xml::deserialize(&data))

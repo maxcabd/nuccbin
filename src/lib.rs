@@ -21,6 +21,7 @@ pub enum NuccBinaryType {
     PlayerIcon,
     Png,
     PrmLoad,
+    SkillIndexSettingParam,
     StaffRollTextParam,
     SupportActionParam,
     Xml,
@@ -47,6 +48,7 @@ impl NuccBinaryType {
             NuccBinaryType::PlayerIcon => { Regex::new(r"(player_icon\.bin)$").unwrap() },
             NuccBinaryType::Png => { Regex::new(r"(\.png)$").unwrap() },
             NuccBinaryType::PrmLoad => { Regex::new(r"(prm_load\.bin)$").unwrap() },
+            NuccBinaryType::SkillIndexSettingParam => { Regex::new(r"(skillIndexSettingParam\.bin)$").unwrap() },
             NuccBinaryType::StaffRollTextParam => { Regex::new(r"(staffRollTextParam\.bin)$").unwrap() },
             NuccBinaryType::SupportActionParam => { Regex::new(r"(supportActionParam\.bin)$").unwrap() },
             NuccBinaryType::Xml => { Regex::new(r"(\.xml)$").unwrap() }
