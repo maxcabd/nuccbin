@@ -3,26 +3,30 @@ use serde::{Serialize, Deserialize};
 
 use super::{NuccBinaryParsed, NuccBinaryType};
 
-// Format reversed by Portable Productions (https://www.youtube.com/@PortableProductions)
 
+// Format reversed by Xact (https://www.youtube.com/@Xact__)
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Entry {
     pub characode_index: u32,
 
-    pub unk1: u32,
-    pub unk2: u32,
+    pub skll1: f32,
+    pub skll2: f32,
+    pub skll3: f32,
+    pub skll4: f32,
+    pub skll5: f32,
+    pub skll6: f32,
 
-    pub support_type: u32,
+    pub awa_skll1: f32, // Awakening skill
+    pub awa_skll2: f32,
 
-    pub unk3: i32,
-    pub unk4: i32,
+
 
 }
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
-pub struct SupportActionParam {
+pub struct SupportSkillRecoverySpeedParam {
     #[serde(skip)]
     pub size: u32,
 
@@ -41,9 +45,9 @@ pub struct SupportActionParam {
     pub entries: Vec<Entry>
 }
 
-impl NuccBinaryParsed for SupportActionParam {
+impl NuccBinaryParsed for SupportSkillRecoverySpeedParam {
     fn binary_type(&self) -> NuccBinaryType {
-        NuccBinaryType::SupportActionParam
+        NuccBinaryType::SkillIndexSettingParam
     }
 
     fn extension(&self) -> String {

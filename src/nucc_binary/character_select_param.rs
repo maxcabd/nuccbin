@@ -15,16 +15,15 @@ pub struct Entry {
 
     pub page_index: u32,
     pub slot_index: u32,
+
+    #[brw(pad_after = 4)]
     pub costume_slot_index: u32,
-    pub unk1: u32,
 
     #[serde(skip)]
     pub message_id_pointer: u64,
 
-
-    pub unk2: u32,
-    pub unk3: u32,
-
+    #[brw(pad_after = 4)]
+    pub duel_player_param_model_index: u32,
 
     #[serde(skip)]
     pub cha_a_id_pointer: u64,
@@ -119,7 +118,7 @@ pub struct Entry {
     pub unk_z8: f32,
 
     #[serde(skip)]
-    pub unk_pointer: u64,
+    pub dictionary_pointer: u64,
 
 
     #[brw(ignore)]
@@ -148,12 +147,6 @@ pub struct Entry {
 
 
 }
-
-// 0x8 + 0x4 
-
-// What is the size in bytes of the Entry struct?
-// It is: 
-
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
@@ -238,7 +231,7 @@ impl From<&[u8]> for CharacterSelectParam {
             entry.cha_a_id = read_string_from_pointer(&mut reader, entry.cha_a_id_pointer, current_offset + 0x28);
             entry.accesory_file = read_string_from_pointer(&mut reader, entry.accessory_pointer, current_offset + 0x30);
             entry.charsel_file = read_string_from_pointer(&mut reader, entry.charsel_pointer, current_offset + 0x38);
-            entry.dictionary_file = read_string_from_pointer(&mut reader, entry.unk_pointer, current_offset + 0x130);
+            entry.dictionary_file = read_string_from_pointer(&mut reader, entry.dictionary_pointer, current_offset + 0x130);
         }
 
         Self {

@@ -5,7 +5,7 @@ use super::{NuccBinaryParsed, NuccBinaryType};
 
 const STR_LEN: usize = 0x20;
 
-// Format was reversed by https://github.com/TheLeonX
+// Format was reversed by TheLeonX (https://github.com/TheLeonX)
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Entry {
@@ -16,7 +16,7 @@ pub struct Entry {
     pub unk0: i16,
     pub volume: f32,
 
-    pub unk1: i16,
+    pub pitch: i16,
     pub unk2: i16,
 
     pub unk3: i16,

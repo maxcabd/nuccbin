@@ -3,26 +3,21 @@ use serde::{Serialize, Deserialize};
 
 use super::{NuccBinaryParsed, NuccBinaryType};
 
-// Format reversed by Portable Productions (https://www.youtube.com/@PortableProductions)
 
+// Format reversed by Kuroha Saenoki (https://www.youtube.com/@KurohaSaenoki)
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Entry {
-    pub characode_index: u32,
+    pub combo_begin_type: i32,
+    pub command: i32, // Type of move (neutral = 0x1, up = 0x2 , down = 0x3, throw = 0x4, etc)
+    pub delay: i32, // Delay before next move
 
-    pub unk1: u32,
-    pub unk2: u32,
-
-    pub support_type: u32,
-
-    pub unk3: i32,
-    pub unk4: i32,
 
 }
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
-pub struct SupportActionParam {
+pub struct ComboPrm {
     #[serde(skip)]
     pub size: u32,
 
@@ -41,9 +36,9 @@ pub struct SupportActionParam {
     pub entries: Vec<Entry>
 }
 
-impl NuccBinaryParsed for SupportActionParam {
+impl NuccBinaryParsed for ComboPrm {
     fn binary_type(&self) -> NuccBinaryType {
-        NuccBinaryType::SupportActionParam
+        NuccBinaryType::ComboPrm
     }
 
     fn extension(&self) -> String {

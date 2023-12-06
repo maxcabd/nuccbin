@@ -6,7 +6,7 @@ use super::{NuccBinaryParsed, NuccBinaryType};
 
 const STR_LEN: usize = 0x20;
 
-
+// Format was reversed by TheLeonX (https://github.com/TheLeonX)
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Entry {
@@ -25,7 +25,6 @@ pub struct Entry {
     pub load_condition: i32,
 
 }
-
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
