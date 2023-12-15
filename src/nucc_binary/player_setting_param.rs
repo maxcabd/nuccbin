@@ -16,15 +16,15 @@ pub struct Entry {
     pub unk1: u32,
 
     #[serde(skip)]
-    pub entrycode_pointer: u64,
+    pub searchcode_ptr: u64,
 
     pub default_jutsu: i32,
     pub default_uj: i32,
 
     #[serde(skip)]
-    pub cha_a_id_pointer: u64,
+    pub cha_a_id_ptr: u64,
     #[serde(skip)]
-    pub cha_b_id_pointer: u64,
+    pub cha_b_id_ptr: u64,
 
 
     pub dlc_id: i32,
@@ -34,7 +34,7 @@ pub struct Entry {
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub entrycode: String,
+    pub searchcode: String,
 
 
     #[brw(ignore)]
@@ -61,7 +61,7 @@ pub struct PlayerSettingParam {
     pub unk0: u16,
 
     #[serde(skip)]
-    pub entry_pointer: u64,
+    pub entry_ptr: u64,
 
     #[br(count = entry_count)]
     pub entries: Vec<Entry>
@@ -99,7 +99,7 @@ impl From<&[u8]> for PlayerSettingParam {
         let entry_count = reader.read_le::<u16>().unwrap();
         let unk0 = reader.read_le::<u16>().unwrap();
 
-        let entry_pointer = reader.read_le::<u64>().unwrap();
+        let entry_ptr = reader.read_le::<u64>().unwrap();
 
         let mut entries = Vec::new();
         entries.reserve_exact(entry_count as usize); // Make sure we reserve enough space to avoid reallocations
@@ -109,10 +109,10 @@ impl From<&[u8]> for PlayerSettingParam {
             entries.push(entry);
         }
 
-        fn read_string_from_pointer(reader: &mut Cursor<&[u8]>, pointer: u64, curent_offset: u64) -> String {
-            if pointer != 0 {
+        fn read_string_from_ptr(reader: &mut Cursor<&[u8]>, ptr: u64, curent_offset: u64) -> String {
+            if ptr != 0 {
                 reader.seek(SeekFrom::Start(curent_offset as u64)).unwrap();
-                reader.seek(SeekFrom::Current(pointer as i64)).unwrap();
+                reader.seek(SeekFrom::Current(ptr as i64)).unwrap();
                 reader.read_be::<NullString>().unwrap().to_string()
             } else {
                 String::from("")
@@ -124,9 +124,9 @@ impl From<&[u8]> for PlayerSettingParam {
         .enumerate()
         .map(|(i, e)| (((0x40 * i + HEADER_SIZE) as u64, e))) 
         {
-            entry.entrycode = read_string_from_pointer(&mut reader, entry.entrycode_pointer, current_offset + 0x10);
-            entry.cha_a_id = read_string_from_pointer(&mut reader, entry.cha_a_id_pointer, current_offset + 0x20);
-            entry.cha_b_id = read_string_from_pointer(&mut reader, entry.cha_b_id_pointer, current_offset + 0x28);
+            entry.searchcode = read_string_from_ptr(&mut reader, entry.searchcode_ptr, current_offset + 0x10);
+            entry.cha_a_id = read_string_from_ptr(&mut reader, entry.cha_a_id_ptr, current_offset + 0x20);
+            entry.cha_b_id = read_string_from_ptr(&mut reader, entry.cha_b_id_ptr, current_offset + 0x28);
         }
 
         Self {
@@ -134,7 +134,7 @@ impl From<&[u8]> for PlayerSettingParam {
             version,
             entry_count,
             unk0,
-            entry_pointer,
+            entry_ptr,
             entries
         }
     }
@@ -153,11 +153,11 @@ impl From<PlayerSettingParam> for Vec<u8> {
         writer.write_le(&player_setting_param.entry_count).unwrap();
         writer.write_le(&player_setting_param.unk0).unwrap();
 
-        writer.write_le(&8u64).unwrap(); // Write the pointer to the entries
+        writer.write_le(&8u64).unwrap(); // Write the ptr to the entries
 
         writer.write_le(&player_setting_param.entries).unwrap();
 
-        fn write_pointer_to_string(
+        fn write_ptr_to_string(
             writer: &mut Cursor<Vec<u8>>,
             string: &String,
             current_offset: u64,
@@ -184,9 +184,9 @@ impl From<PlayerSettingParam> for Vec<u8> {
             .enumerate()
             .map(|(i, e)| (((0x40 * i + HEADER_SIZE) as u64, e)))
         {
-            write_pointer_to_string(&mut writer, &entry.entrycode, current_offset as u64, 0x10);
-            write_pointer_to_string(&mut writer, &entry.cha_a_id, current_offset as u64, 0x20);
-            write_pointer_to_string(&mut writer, &entry.cha_b_id, current_offset as u64, 0x28);
+            write_ptr_to_string(&mut writer, &entry.searchcode, current_offset as u64, 0x10);
+            write_ptr_to_string(&mut writer, &entry.cha_a_id, current_offset as u64, 0x20);
+            write_ptr_to_string(&mut writer, &entry.cha_b_id, current_offset as u64, 0x28);
         }
 
         writer.set_position(0);

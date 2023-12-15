@@ -22,6 +22,7 @@ pub struct ComboPrm {
     pub size: u32,
 
     #[serde(skip)]
+    #[bw(calc = 1001)]
     pub version: u32,
 
     pub entry_count: u16,
@@ -30,7 +31,8 @@ pub struct ComboPrm {
     pub unk0: u16,
 
     #[serde(skip)]
-    pub entry_pointer: u64,
+    #[bw(calc = 0x8)]
+    pub entry_ptr: u64,
 
     #[br(count = entry_count)]
     pub entries: Vec<Entry>

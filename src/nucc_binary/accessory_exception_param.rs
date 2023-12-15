@@ -4,26 +4,37 @@ use serde::{Serialize, Deserialize};
 
 use super::{NuccBinaryParsed, NuccBinaryType};
 
-const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
 
-// Format reversed by Portable Productions (https://www.youtube.com/@PortableProductions)
+const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Entry {
     #[serde(skip)]
-    pub substring_ptr: u64,
+    pub modelcode_ptr: u64,
 
+    pub head: u32, // A value of 0x1 means there are exceptions
+    pub face: u32,
+    pub shoulders: u32,
+    pub back_a: u32,
+    pub arms: u32,
+    pub unk6: u32,
+    pub waist: u32,
+    pub unk8: u32,
+    pub head_a: u32,
+    pub unk10: u32,
+    pub unk11: u32,
+    pub unk12: u32,
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub substring: String,
+    pub modelcode: String,
 
 }
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
-pub struct ProhibitedSubstringParam {
+pub struct AccessoryExceptionParam {
     #[serde(skip)]
     pub size: u32,
 
@@ -42,9 +53,9 @@ pub struct ProhibitedSubstringParam {
     pub entries: Vec<Entry>
 }
 
-impl NuccBinaryParsed for ProhibitedSubstringParam {
+impl NuccBinaryParsed for AccessoryExceptionParam {
     fn binary_type(&self) -> NuccBinaryType {
-        NuccBinaryType::ProhibitedSubstringParam
+        NuccBinaryType::AccessoryExceptionParam
     }
 
     fn extension(&self) -> String {
@@ -63,8 +74,7 @@ impl NuccBinaryParsed for ProhibitedSubstringParam {
         }
 }
 
-
-impl From<&[u8]> for ProhibitedSubstringParam {
+impl From<&[u8]> for AccessoryExceptionParam {
     fn from(data: &[u8]) -> Self {
         let mut reader = Cursor::new(data);
         
@@ -97,9 +107,9 @@ impl From<&[u8]> for ProhibitedSubstringParam {
         for (current_offset, entry) in entries
         .iter_mut()
         .enumerate()
-        .map(|(i, e)| (((0x8 * i + HEADER_SIZE) as u64, e))) 
+        .map(|(i, e)| (((0x38 * i + HEADER_SIZE) as u64, e))) 
         {
-            entry.substring = read_string_from_ptr(&mut reader, entry.substring_ptr, current_offset);
+            entry.modelcode = read_string_from_ptr(&mut reader, entry.modelcode_ptr, current_offset);
         }
 
         Self {
@@ -113,22 +123,22 @@ impl From<&[u8]> for ProhibitedSubstringParam {
     }
 }
 
-impl From<ProhibitedSubstringParam> for Vec<u8> {
-    fn from(mut prohibited_substring_param: ProhibitedSubstringParam) -> Self {
+impl From<AccessoryExceptionParam> for Vec<u8> {
+    fn from(mut accessory_exception_param: AccessoryExceptionParam) -> Self {
         // Consumes the deserialized version and returns the bytes
         let mut writer = Cursor::new(Vec::new());
 
-        prohibited_substring_param.entry_count = prohibited_substring_param.entries.len() as u16; // Update entry count
+        accessory_exception_param.entry_count = accessory_exception_param.entries.len() as u16; // Update entry count
 
-        writer.write_be(&prohibited_substring_param.size).unwrap();
+        writer.write_be(&accessory_exception_param.size).unwrap();
         writer.write_le(&1000u32).unwrap(); // Write the version
 
-        writer.write_le(&prohibited_substring_param.entry_count).unwrap();
-        writer.write_le(&prohibited_substring_param.unk0).unwrap();
+        writer.write_le(&accessory_exception_param.entry_count).unwrap();
+        writer.write_le(&accessory_exception_param.unk0).unwrap();
 
         writer.write_le(&8u64).unwrap(); // Write the ptr to the entries
 
-        writer.write_le(&prohibited_substring_param.entries).unwrap();
+        writer.write_le(&accessory_exception_param.entries).unwrap();
 
         fn write_ptr_to_string(
             writer: &mut Cursor<Vec<u8>>,
@@ -152,12 +162,12 @@ impl From<ProhibitedSubstringParam> for Vec<u8> {
                 
             }
         }
-        for (current_offset, entry) in prohibited_substring_param.entries
+        for (current_offset, entry) in accessory_exception_param.entries
             .iter_mut()
             .enumerate()
-            .map(|(i, e)| (((0x8 * i + HEADER_SIZE) as u64, e)))
+            .map(|(i, e)| (((0x38 * i + HEADER_SIZE) as u64, e)))
         {
-            write_ptr_to_string(&mut writer, &entry.substring, current_offset as u64, 0x0);
+            write_ptr_to_string(&mut writer, &entry.modelcode, current_offset as u64, 0x0);
         }
 
         writer.set_position(0);

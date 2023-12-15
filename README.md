@@ -11,12 +11,14 @@ A tool to serialize/deserialize several nuccChunkBinary .xfbin's from Ultimate N
 nuccbin supports a number of in game nuccChunkBinary param / bin formats. All formats support serializing. While some may not support deserializing.
 | File | Serialize | Deserialize | Extension |
 | --- | --- | --- | --- |
+| [accessoriesParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/accessories_param.rs) | ✔️ | ✔️ | `json` |
 | [accessoryParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/accessory_param.rs) | ✔️ | ✔️ | `json` |
 | [animeSongBgmParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/anime_song_bgm_param.rs) | ✔️ | ✔️ | `json` |
 | [characode](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/characode.rs) | ✔️ | ✔️  | `json` |
 | [CharaPoseParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/chara_pose_param.rs) | ✔️ | ✔️ | `json` |
 | [characterSelectParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/character_select_param.rs) | ✔️ | ✔️ | `json` |
 | [comboPrm](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/combo_prm.rs) | ✔️ | ✔️ | `json` |
+| [commmandListParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/command_list_param.rs) | ✔️ | ✔️ | `json` |
 | [costumeParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/costume_param.rs) | ✔️ | ✔️ | `json` |
 | [dds](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/dds.rs) | ✔️ | ✔️ |  `dds` |
 | [DlcInfoParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/dlc_info_param.rs) | ✔️ | ✔️ | `json` |
@@ -42,9 +44,9 @@ This project is based on the [initial work](https://github.com/SutandoTsukai181/
 Special thanks goes to several members including:
 * [EliteAce170](https://www.youtube.com/@EliteAce) for reversing some formats.
 * [HydraBladeZ](https://github.com/Al-Hydra) for reversing some formats.
-* [TheLeonX](https://github.com/TheLeonX) for work on the Character Manager which was used as inspiration and several formats.
-* [PortableProductions](https://www.youtube.com/@PortableProductions) for help on several formats and information.
-* [Kuroha Saenoki](https://www.youtube.com/@KurohaSaenoki) for information on some formats.
+* [TheLeonX](https://github.com/TheLeonX) for work on the Character Manager which was used as inspiration and some formats.
+* [PortableProductions](https://www.youtube.com/@PortableProductions) for reversing some formats.
+* [Kuroha Saenoki](https://www.youtube.com/@KurohaSaenoki) for reversing some formats.
 * [Valant96](https://www.youtube.com/@valant96) for information on some formats.
 * [Xact](https://www.youtube.com/@valant96) for reversing some formats.
 * and [SutandoTsukai181](https://github.com/SutandoTsukai181) for his initial work on the tool.

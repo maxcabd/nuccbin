@@ -30,7 +30,7 @@ pub struct SkillIndexSettingParam {
     pub unk0: u16,
 
     #[serde(skip)]
-    pub entry_pointer: u64,
+    pub entry_ptr: u64,
 
     #[br(count = entry_count)]
     pub entries: Vec<Entry>

@@ -12,7 +12,7 @@ const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
 pub struct Entry {
     #[serde(skip)]
     #[brw(pad_after = 0x28)]
-    pub credit_pointer: u64,
+    pub credit_ptr: u64,
 
 
     #[brw(ignore)]
@@ -35,7 +35,7 @@ pub struct StaffRollTextParam {
     pub unk0: u16,
 
     #[serde(skip)]
-    pub entry_pointer: u64,
+    pub entry_ptr: u64,
 
     #[br(count = entry_count)]
     pub entries: Vec<Entry>
@@ -73,7 +73,7 @@ impl From<&[u8]> for StaffRollTextParam {
         let entry_count = reader.read_le::<u16>().unwrap();
         let unk0 = reader.read_le::<u16>().unwrap();
 
-        let entry_pointer = reader.read_le::<u64>().unwrap();
+        let entry_ptr = reader.read_le::<u64>().unwrap();
 
         let mut entries = Vec::new();
         entries.reserve_exact(entry_count as usize); // Make sure we reserve enough space to avoid reallocations
@@ -83,10 +83,10 @@ impl From<&[u8]> for StaffRollTextParam {
             entries.push(entry);
         }
 
-        fn read_string_from_pointer(reader: &mut Cursor<&[u8]>, pointer: u64, curent_offset: u64) -> String {
-            if pointer != 0 {
+        fn read_string_from_ptr(reader: &mut Cursor<&[u8]>, ptr: u64, curent_offset: u64) -> String {
+            if ptr != 0 {
                 reader.seek(SeekFrom::Start(curent_offset as u64)).unwrap();
-                reader.seek(SeekFrom::Current(pointer as i64)).unwrap();
+                reader.seek(SeekFrom::Current(ptr as i64)).unwrap();
                 reader.read_be::<NullString>().unwrap().to_string()
             } else {
                 String::from("")
@@ -98,7 +98,7 @@ impl From<&[u8]> for StaffRollTextParam {
         .enumerate()
         .map(|(i, e)| (((0x30 * i + HEADER_SIZE) as u64, e))) 
         {
-            entry.credit = read_string_from_pointer(&mut reader, entry.credit_pointer, current_offset as u64);
+            entry.credit = read_string_from_ptr(&mut reader, entry.credit_ptr, current_offset as u64);
         }
 
         Self {
@@ -106,7 +106,7 @@ impl From<&[u8]> for StaffRollTextParam {
             version,
             entry_count,
             unk0,
-            entry_pointer,
+            entry_ptr,
             entries
         }
     }
@@ -125,11 +125,11 @@ impl From<StaffRollTextParam> for Vec<u8> {
         writer.write_le(&chara_pose_param.entry_count).unwrap();
         writer.write_le(&chara_pose_param.unk0).unwrap();
 
-        writer.write_le(&8u64).unwrap(); // Write the pointer to the entries
+        writer.write_le(&8u64).unwrap(); // Write the ptr to the entries
 
         writer.write_le(&chara_pose_param.entries).unwrap();
 
-        fn write_pointer_to_string(
+        fn write_ptr_to_string(
             writer: &mut Cursor<Vec<u8>>,
             string: &String,
             current_offset: u64,
@@ -156,7 +156,7 @@ impl From<StaffRollTextParam> for Vec<u8> {
             .enumerate()
             .map(|(i, e)| (((0x30 * i + HEADER_SIZE) as u64, e)))
         {
-            write_pointer_to_string(&mut writer, &entry.credit, current_offset as u64, 0x0);
+            write_ptr_to_string(&mut writer, &entry.credit, current_offset as u64, 0x0);
         }
 
   

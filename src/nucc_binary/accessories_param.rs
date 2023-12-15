@@ -2,69 +2,63 @@ use binrw::{binrw, BinReaderExt, BinWriterExt, NullString};
 use binrw::io::{Cursor, Seek, SeekFrom};
 use serde::{Serialize, Deserialize};
 
+
 use super::{NuccBinaryParsed, NuccBinaryType};
 
-
 const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
-const SPL_VICTIM_COUNT: usize = 50;
 
-// Format reversed by EliteAce170 (https://www.youtube.com/c/EliteAce)
+// Format reversed by Kuroha Saenoki (https://www.youtube.com/@KurohaSaenoki)
+
+#[allow(non_snake_case)]
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Entry {
-    pub story_mode_id: i32,
-    pub pair_sp_skill_id: i32, // Team Ultimate Jutsu ID
-    pub player_setting_id: i32,
-
-    pub costume_slot_index: i32,
+    #[serde(skip)]
+    pub accessory_name_id_ptr: u64,
 
     #[serde(skip)]
-    pub sp_skill_1_name_ptr: u64,
+    pub accessory_link_ptr: u64,
 
+    pub index: u32,
+    pub price: u32,
 
     #[serde(skip)]
+    pub icon_ptr: u64,
+    #[serde(skip)]
+    pub accessory_ptr: u64,
+
+    pub ofsX: i32, // Left/Right
+    pub ofsZ: i32, // Towards/Away from camera
+    pub ofsY: i32, // Up/Down
+
+    pub rotY: i32, // Up/Down
+    pub rotZ: i32, // Left/Right
+    pub rotX: i32, // Left/Right
+
     #[brw(pad_after = 4)]
-    pub sp_skill_2_name_ptr: u64,
+    pub unlock_condition: u32,
 
-    #[br(count = SPL_VICTIM_COUNT)]
-    pub spl_fin_victims: Vec<SplFinVictim>,
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub sp_skill_1_name: String,
+    pub accessory_name_id: String,
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub sp_skill_2_name: String,
+    pub accessory_link: String,
 
+    #[brw(ignore)]
+    #[bw(map = |x| x.parse::<u8>().unwrap())]
+    pub icon: String,
 
+    #[brw(ignore)]
+    #[bw(map = |x| x.parse::<u8>().unwrap())]
+    pub accessory: String,
 }
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
-pub struct SplFinVictim {
-    pub victim_player_setting_id: i32,
-
-    #[serde(skip)]
-    pub victim_name_ptr: u64,
-
-    #[serde(skip)]
-    #[brw(pad_after = 4)]
-    pub victim_texture_name_ptr: u64,
-
-    #[brw(ignore)]
-    #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub victim_name: String,
-
-    #[brw(ignore)]
-    #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub victim_texture_name: String
-}
-
-
-#[binrw]
-#[derive(Serialize, Deserialize, Debug)]
-pub struct FinalSpSkillCutIn {
+pub struct AccessoriesParam {
     #[serde(skip)]
     pub size: u32,
 
@@ -83,9 +77,9 @@ pub struct FinalSpSkillCutIn {
     pub entries: Vec<Entry>
 }
 
-impl NuccBinaryParsed for FinalSpSkillCutIn {
+impl NuccBinaryParsed for AccessoriesParam {
     fn binary_type(&self) -> NuccBinaryType {
-        NuccBinaryType::FinalSpSkillCutIn
+        NuccBinaryType::AccessoriesParam
     }
 
     fn extension(&self) -> String {
@@ -104,7 +98,7 @@ impl NuccBinaryParsed for FinalSpSkillCutIn {
         }
 }
 
-impl From<&[u8]> for FinalSpSkillCutIn {
+impl From<&[u8]> for AccessoriesParam {
     fn from(data: &[u8]) -> Self {
         let mut reader = Cursor::new(data);
         
@@ -124,6 +118,7 @@ impl From<&[u8]> for FinalSpSkillCutIn {
             entries.push(entry);
         }
 
+
         fn read_string_from_ptr(reader: &mut Cursor<&[u8]>, ptr: u64, curent_offset: u64) -> String {
             if ptr != 0 {
                 reader.seek(SeekFrom::Start(curent_offset as u64)).unwrap();
@@ -137,30 +132,12 @@ impl From<&[u8]> for FinalSpSkillCutIn {
         for (current_offset, entry) in entries
         .iter_mut()
         .enumerate()
-        .map(|(i, e)| (((0x4d8 * i + HEADER_SIZE) as u64, e))) 
+        .map(|(i, e)| (((0x48 * i + HEADER_SIZE) as u64, e))) 
         {
-            entry.sp_skill_1_name = read_string_from_ptr(&mut reader, entry.sp_skill_1_name_ptr, current_offset + 0x10);
-            entry.sp_skill_2_name = read_string_from_ptr(&mut reader, entry.sp_skill_2_name_ptr, current_offset + 0x18);
-
-        
-            let mut spl_fin_victims = Vec::new();
-            spl_fin_victims.reserve_exact(SPL_VICTIM_COUNT as usize); // Make sure we have enough space to avoid reallocations
-
-            for _ in 0..SPL_VICTIM_COUNT as usize {
-                let victim = reader.read_le::<SplFinVictim>().unwrap();
-                spl_fin_victims.push(victim);
-            }
-
-            for (current_offset, victim) in spl_fin_victims
-            .iter_mut()
-            .enumerate()
-            .map(|(i, e)| (((0x4b4 * i + (0x24 + 0x14)) as u64, e))) 
-            {
-                victim.victim_name = read_string_from_ptr(&mut reader, victim.victim_name_ptr, current_offset + 0x4);
-                victim.victim_texture_name = read_string_from_ptr(&mut reader, victim.victim_texture_name_ptr, current_offset + 0x8);
-            }
-
-            entry.spl_fin_victims = spl_fin_victims;
+            entry.accessory_name_id = read_string_from_ptr(&mut reader, entry.accessory_name_id_ptr, current_offset as u64);
+            entry.accessory_link = read_string_from_ptr(&mut reader, entry.accessory_link_ptr, current_offset + 0x8);
+            entry.icon = read_string_from_ptr(&mut reader, entry.icon_ptr, current_offset + 0x18);
+            entry.accessory = read_string_from_ptr(&mut reader, entry.accessory_ptr, current_offset + 0x20);
         }
 
         Self {
@@ -171,24 +148,26 @@ impl From<&[u8]> for FinalSpSkillCutIn {
             entry_ptr,
             entries
         }
+
     }
 }
 
-impl From<FinalSpSkillCutIn> for Vec<u8> {
-    fn from(mut final_spl_cutin: FinalSpSkillCutIn) -> Self {
+impl From<AccessoriesParam> for Vec<u8> {
+    fn from(mut accessories_param: AccessoriesParam) -> Self {
         let mut writer = Cursor::new(Vec::new());
 
-        final_spl_cutin.entry_count = final_spl_cutin.entries.len() as u16; // Update entry count
+        accessories_param.entry_count = accessories_param.entries.len() as u16; // Update entry count
 
-        writer.write_be(&final_spl_cutin.size).unwrap();
-        writer.write_le(&1001u32).unwrap(); // Write the version
+        writer.write_be(&accessories_param.size).unwrap();
+        writer.write_le(&1000u32).unwrap(); // Write the version
 
-        writer.write_le(&final_spl_cutin.entry_count).unwrap();
-        writer.write_le(&final_spl_cutin.unk0).unwrap();
+        writer.write_le(&accessories_param.entry_count).unwrap();
+        writer.write_le(&accessories_param.unk0).unwrap();
 
         writer.write_le(&8u64).unwrap(); // Write the ptr to the entries
 
-        writer.write_le(&final_spl_cutin.entries).unwrap();
+
+        writer.write_le(&accessories_param.entries).unwrap();
 
         fn write_ptr_to_string(
             writer: &mut Cursor<Vec<u8>>,
@@ -212,25 +191,20 @@ impl From<FinalSpSkillCutIn> for Vec<u8> {
                 
             }
         }
-
-        for (current_offset, entry) in final_spl_cutin.entries
+        for (current_offset, entry) in accessories_param.entries
             .iter_mut()
             .enumerate()
-            .map(|(i, e)| (((0x4d8 * i + HEADER_SIZE) as u64, e)))
+            .map(|(i, e)| (((0x48 * i + HEADER_SIZE) as u64, e)))
         {
-            write_ptr_to_string(&mut writer, &entry.sp_skill_1_name, current_offset as u64, 0x10);
-            write_ptr_to_string(&mut writer, &entry.sp_skill_2_name, current_offset as u64, 0x18);
-            
+            write_ptr_to_string(&mut writer, &entry.accessory_name_id, current_offset as u64, 0x0);
+            write_ptr_to_string(&mut writer, &entry.accessory_link, current_offset as u64, 0x8);
+            write_ptr_to_string(&mut writer, &entry.icon, current_offset as u64, 0x18);
+            write_ptr_to_string(&mut writer, &entry.accessory, current_offset as u64, 0x20);
+        }
 
-
-            for (current_offset, victim) in entry.spl_fin_victims
-            .iter_mut()
-            .enumerate()
-            .map(|(i, e)| (((0x18 * i + (HEADER_SIZE + 0x28)) as u64, e))) 
-            {
-                write_ptr_to_string(&mut writer, &victim.victim_name, current_offset as u64, 0x0);
-                write_ptr_to_string(&mut writer, &victim.victim_texture_name, current_offset as u64, 0x4);
-            }
+        // Update the indices in case they were changed
+        for (i, entry) in accessories_param.entries.iter_mut().enumerate() {
+            entry.index = i as u32;
         }
 
         // Go to the start of buffer and write the size
@@ -238,9 +212,5 @@ impl From<FinalSpSkillCutIn> for Vec<u8> {
         writer.write_be::<u32>(&((writer.get_ref().len() - 4) as u32)).unwrap();
 
         writer.into_inner()
-
     }
 }
-
-
-

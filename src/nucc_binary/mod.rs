@@ -1,3 +1,5 @@
+mod accessories_param;
+mod accessory_exception_param;
 mod accessory_param;
 mod anime_song_bgm_param;
 mod anmoffset;
@@ -5,6 +7,7 @@ mod characode;
 mod chara_pose_param;
 mod character_select_param;
 mod combo_prm;
+mod command_list_param;
 mod costume_param;
 mod dds;
 mod dlc_info_param;
@@ -32,12 +35,15 @@ use downcast_rs::{impl_downcast, Downcast};
 use super::NuccBinaryType;
 
 //--------------------//
+pub use accessories_param::AccessoriesParam;
+pub use accessory_exception_param::AccessoryExceptionParam;
 pub use accessory_param::AccessoryParam;
 pub use anime_song_bgm_param::AnimeSongBgmParam;
 pub use characode::Characode;
 pub use chara_pose_param::CharaPoseParam;
 pub use character_select_param::CharacterSelectParam;
 pub use combo_prm::ComboPrm;
+pub use command_list_param::CommandListParam;
 pub use costume_param::CostumeParam;
 pub use dds::Dds;
 pub use dlc_info_param::DlcInfoParam;
@@ -78,6 +84,8 @@ impl From<NuccBinaryParsedReader<'_>> for Box<dyn NuccBinaryParsed> {
         let NuccBinaryParsedReader(nucc_binary_type, data) = reader;
 
         match nucc_binary_type {
+            NuccBinaryType::AccessoriesParam => Box::new(AccessoriesParam::from(&data[..])),
+            NuccBinaryType::AccessoryExceptionParam => Box::new(AccessoryExceptionParam::from(&data[..])),
             NuccBinaryType::AccessoryParam => Box::new(AccessoryParam::from(&data[..])),
             NuccBinaryType::AnimeSongBgmParam => Box::new(AnimeSongBgmParam::from(&data[..])),
             
@@ -94,6 +102,7 @@ impl From<NuccBinaryParsedReader<'_>> for Box<dyn NuccBinaryParsed> {
                 Box::new(combo_prm.read_le::<ComboPrm>().unwrap())
             }
 
+            NuccBinaryType::CommandListParam => Box::new(CommandListParam::from(&data[..])),
             NuccBinaryType::CostumeParam => Box::new(CostumeParam::from(&data[..])),
             NuccBinaryType::Dds => Box::new(Dds::from(&data[..])),
             NuccBinaryType::DlcInfoParam => Box::new(DlcInfoParam::from(&data[..])),
@@ -138,7 +147,7 @@ impl From<NuccBinaryParsedReader<'_>> for Box<dyn NuccBinaryParsed> {
 
             NuccBinaryType::SupportSkillRecoverySpeedParam => {
                 let mut support_skill_recovery_speed_param = Cursor::new(data);
-                Box::new(support_skill_recovery_speed_param.read_le::<SupportActionParam>().unwrap())
+                Box::new(support_skill_recovery_speed_param.read_le::<SupportSkillRecoverySpeedParam>().unwrap())
             }
 
             NuccBinaryType::Xml => Box::new(Xml::from(&data[..])),
@@ -153,9 +162,10 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
         let NuccBinaryParsedWriter(boxed) = writer;
         
         match boxed.binary_type() {
+            NuccBinaryType::AccessoriesParam => { (*boxed.downcast::<AccessoriesParam>().ok().unwrap()).into() },
+            NuccBinaryType::AccessoryExceptionParam => { (*boxed.downcast::<AccessoryExceptionParam>().ok().unwrap()).into() },
             NuccBinaryType::AccessoryParam => { (*boxed.downcast::<AccessoryParam>().ok().unwrap()).into() },
             NuccBinaryType::AnimeSongBgmParam => { (*boxed.downcast::<AnimeSongBgmParam>().ok().unwrap()).into() },
-
             NuccBinaryType::Characode => {
                 let mut characode = Cursor::new(Vec::new());
                 characode.write_le(&*boxed.downcast::<Characode>().ok().unwrap()).unwrap();
@@ -167,8 +177,6 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
 
             NuccBinaryType::CharaPoseParam => { (*boxed.downcast::<CharaPoseParam>().ok().unwrap()).into() },
             NuccBinaryType::CharacterSelectParam => { (*boxed.downcast::<CharacterSelectParam>().ok().unwrap()).into() },
-            NuccBinaryType::CostumeParam => { (*boxed.downcast::<CostumeParam>().ok().unwrap()).into() },
-            
             NuccBinaryType::ComboPrm => {
                 let mut combo_prm = Cursor::new(Vec::new());
                 combo_prm.write_le(&*boxed.downcast::<ComboPrm>().ok().unwrap()).unwrap();
@@ -178,9 +186,10 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
                 combo_prm.into_inner()
             },
 
+            NuccBinaryType::CommandListParam => { (*boxed.downcast::<CommandListParam>().ok().unwrap()).into() },
+            NuccBinaryType::CostumeParam => { (*boxed.downcast::<CostumeParam>().ok().unwrap()).into() },
             NuccBinaryType::Dds => { (*boxed.downcast::<Dds>().ok().unwrap()).into() },
             NuccBinaryType::DlcInfoParam => { (*boxed.downcast::<DlcInfoParam>().ok().unwrap()).into() },
-
             NuccBinaryType::EffectPrm => {
                 let mut effect_prm = Cursor::new(Vec::new());
                 effect_prm.write_le(&*boxed.downcast::<EffectPrm>().ok().unwrap()).unwrap();
@@ -200,14 +209,12 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
             },
 
             NuccBinaryType::FinalSpSkillCutIn => { (*boxed.downcast::<FinalSpSkillCutIn>().ok().unwrap()).into() },
-
             NuccBinaryType::Lua => { (*boxed.downcast::<Lua>().ok().unwrap()).into() },
             NuccBinaryType::MessageInfo => { (*boxed.downcast::<MessageInfo>().ok().unwrap()).into() },
             NuccBinaryType::PlayerDoubleEffectParam => { (*boxed.downcast::<PlayerDoubleEffectParam>().ok().unwrap()).into() },
             NuccBinaryType::PlayerSettingParam => { (*boxed.downcast::<PlayerSettingParam>().ok().unwrap()).into() },
             NuccBinaryType::PlayerIcon => { (*boxed.downcast::<PlayerIcon>().ok().unwrap()).into() },
             NuccBinaryType::Png => { (*boxed.downcast::<Png>().ok().unwrap()).into() },
-
             NuccBinaryType::PrmLoad => {
                 let mut prm_load = Cursor::new(Vec::new());
                 prm_load.write_le(&*boxed.downcast::<PrmLoad>().ok().unwrap()).unwrap();
@@ -218,7 +225,6 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
             },
 
             NuccBinaryType::ProhibitedSubstringParam => { (*boxed.downcast::<ProhibitedSubstringParam>().ok().unwrap()).into() },
-
             NuccBinaryType::SkillIndexSettingParam => {
                 let mut skill_index_setting_param = Cursor::new(Vec::new());
                 skill_index_setting_param.write_le(&*boxed.downcast::<SkillIndexSettingParam>().ok().unwrap()).unwrap();
@@ -229,7 +235,6 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
             },
 
             NuccBinaryType::StaffRollTextParam => { (*boxed.downcast::<StaffRollTextParam>().ok().unwrap()).into() },
-
             NuccBinaryType::SupportActionParam => {
                 let mut support_action_param = Cursor::new(Vec::new());
                 support_action_param.write_le(&*boxed.downcast::<SupportActionParam>().ok().unwrap()).unwrap();
@@ -270,13 +275,16 @@ impl From<NuccBinaryParsedDeserializer> for Box<dyn NuccBinaryParsed> {
        let NuccBinaryParsedDeserializer(nucc_binary_type, data) = deserializer;
 
         match nucc_binary_type {
+            NuccBinaryType::AccessoriesParam => Box::new(AccessoriesParam::deserialize(&data)),
+            NuccBinaryType::AccessoryExceptionParam => Box::new(AccessoryExceptionParam::deserialize(&data)),
             NuccBinaryType::AccessoryParam => Box::new(AccessoryParam::deserialize(&data)),
             NuccBinaryType::AnimeSongBgmParam => Box::new(AnimeSongBgmParam::deserialize(&data)),
             NuccBinaryType::Characode => Box::new(Characode::deserialize(&data)),
             NuccBinaryType::CharaPoseParam => Box::new(CharaPoseParam::deserialize(&data)),
             NuccBinaryType::CharacterSelectParam => Box::new(CharacterSelectParam::deserialize(&data)),
-            NuccBinaryType::CostumeParam => Box::new(CostumeParam::deserialize(&data)),
             NuccBinaryType::ComboPrm => Box::new(ComboPrm::deserialize(&data)),
+            NuccBinaryType::CommandListParam => Box::new(CommandListParam::deserialize(&data)),
+            NuccBinaryType::CostumeParam => Box::new(CostumeParam::deserialize(&data)),
             NuccBinaryType::Dds => Box::new(Dds::deserialize(&data)),
             NuccBinaryType::DlcInfoParam => Box::new(DlcInfoParam::deserialize(&data)),
             NuccBinaryType::EffectPrm => Box::new(EffectPrm::deserialize(&data)),

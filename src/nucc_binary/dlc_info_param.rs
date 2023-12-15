@@ -12,43 +12,43 @@ const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Entry {
     #[serde(skip)]
-    pub steam_app_id_pointer: u64,
+    pub steam_app_id_ptr: u64,
 
     #[serde(skip)]
-    pub ps5_content_id_pointer: u64,
+    pub ps5_content_id_ptr: u64,
 
     #[serde(skip)]
-    pub ps4_content_id_pointer: u64,
-
-
-    #[serde(skip)]
-    pub nintendo_content_id_pointer: u64,
+    pub ps4_content_id_ptr: u64,
 
 
     #[serde(skip)]
-    pub xbox_content_id_pointer: u64,
+    pub nintendo_content_id_ptr: u64,
 
-    #[brw(pad_before = 4)]
+
+    #[serde(skip)]
+    pub xbox_content_id_ptr: u64,
+
+    pub index: u32, // ???
     pub unk1: u32,
 
     pub kind: u32, // Type of DLC (0 = Character, 1 = Costume, 2 = BGM, 3 = Season Pass, 4 = Accesories, 5 = Subsitution Item)
     pub unk2: u32,
 
     #[serde(skip)]
-    pub cpk_path_pointer: u64,
+    pub cpk_path_ptr: u64,
 
 
     pub unk3: u32,
     pub unk4: u32,
 
     #[serde(skip)]
-    pub dummy2_pointer: u64,
+    pub dummy2_ptr: u64,
 
     #[serde(skip)]
-    pub dummy3_pointer: u64,
+    pub dummy3_ptr: u64,
 
     #[serde(skip)]
-    pub dummy4_pointer: u64,
+    pub dummy4_ptr: u64,
 
 
     pub unk5: u32,
@@ -56,10 +56,10 @@ pub struct Entry {
 
 
     #[serde(skip)]
-    pub dummy5_pointer: u64,
+    pub dummy5_ptr: u64,
 
     #[serde(skip)]
-    pub dummy6_pointer: u64,
+    pub dummy6_ptr: u64,
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
@@ -122,7 +122,7 @@ pub struct DlcInfoParam {
     pub unk0: u16,
 
     #[serde(skip)]
-    pub entry_pointer: u64,
+    pub entry_ptr: u64,
 
     #[br(count = entry_count)]
     pub entries: Vec<Entry>
@@ -159,7 +159,7 @@ impl From<&[u8]> for DlcInfoParam {
         let entry_count = reader.read_le::<u16>().unwrap();
         let unk0 = reader.read_le::<u16>().unwrap();
 
-        let entry_pointer = reader.read_le::<u64>().unwrap();
+        let entry_ptr = reader.read_le::<u64>().unwrap();
 
         let mut entries = Vec::new();
         entries.reserve_exact(entry_count as usize); // Make sure we reserve enough space to avoid reallocations
@@ -169,10 +169,10 @@ impl From<&[u8]> for DlcInfoParam {
             entries.push(entry);
         }
 
-        fn read_string_from_pointer(reader: &mut Cursor<&[u8]>, pointer: u64, curent_offset: u64) -> String {
-            if pointer != 0 {
+        fn read_string_from_ptr(reader: &mut Cursor<&[u8]>, ptr: u64, curent_offset: u64) -> String {
+            if ptr != 0 {
                 reader.seek(SeekFrom::Start(curent_offset as u64)).unwrap();
-                reader.seek(SeekFrom::Current(pointer as i64)).unwrap();
+                reader.seek(SeekFrom::Current(ptr as i64)).unwrap();
                 reader.read_be::<NullString>().unwrap().to_string()
             } else {
                 String::from("")
@@ -184,17 +184,17 @@ impl From<&[u8]> for DlcInfoParam {
         .enumerate()
         .map(|(i, e)| (((0x78 * i + HEADER_SIZE) as u64, e))) 
         {
-            entry.steam_app_id = read_string_from_pointer(&mut reader, entry.steam_app_id_pointer, current_offset);
-            entry.ps5_content_id = read_string_from_pointer(&mut reader, entry.ps5_content_id_pointer, current_offset + 0x8);
-            entry.ps4_content_id = read_string_from_pointer(&mut reader, entry.ps4_content_id_pointer, current_offset + 0x10);
-            entry.nintendo_content_id = read_string_from_pointer(&mut reader, entry.nintendo_content_id_pointer, current_offset + 0x18);
-            entry.xbox_content_id = read_string_from_pointer(&mut reader, entry.xbox_content_id_pointer, current_offset + 0x20);
-            entry.cpk_path = read_string_from_pointer(&mut reader, entry.cpk_path_pointer, current_offset + 0x38);
-            entry.dummy2 = read_string_from_pointer(&mut reader, entry.dummy2_pointer, current_offset + 0x48);
-            entry.dummy3 = read_string_from_pointer(&mut reader, entry.dummy3_pointer, current_offset + 0x50);
-            entry.dummy4 = read_string_from_pointer(&mut reader, entry.dummy4_pointer, current_offset + 0x58);
-            entry.dummy5 = read_string_from_pointer(&mut reader, entry.dummy5_pointer, current_offset + 0x68);
-            entry.dummy6 = read_string_from_pointer(&mut reader, entry.dummy5_pointer, current_offset + 0x70);
+            entry.steam_app_id = read_string_from_ptr(&mut reader, entry.steam_app_id_ptr, current_offset);
+            entry.ps5_content_id = read_string_from_ptr(&mut reader, entry.ps5_content_id_ptr, current_offset + 0x8);
+            entry.ps4_content_id = read_string_from_ptr(&mut reader, entry.ps4_content_id_ptr, current_offset + 0x10);
+            entry.nintendo_content_id = read_string_from_ptr(&mut reader, entry.nintendo_content_id_ptr, current_offset + 0x18);
+            entry.xbox_content_id = read_string_from_ptr(&mut reader, entry.xbox_content_id_ptr, current_offset + 0x20);
+            entry.cpk_path = read_string_from_ptr(&mut reader, entry.cpk_path_ptr, current_offset + 0x38);
+            entry.dummy2 = read_string_from_ptr(&mut reader, entry.dummy2_ptr, current_offset + 0x48);
+            entry.dummy3 = read_string_from_ptr(&mut reader, entry.dummy3_ptr, current_offset + 0x50);
+            entry.dummy4 = read_string_from_ptr(&mut reader, entry.dummy4_ptr, current_offset + 0x58);
+            entry.dummy5 = read_string_from_ptr(&mut reader, entry.dummy5_ptr, current_offset + 0x68);
+            entry.dummy6 = read_string_from_ptr(&mut reader, entry.dummy5_ptr, current_offset + 0x70);
 
         }
 
@@ -203,7 +203,7 @@ impl From<&[u8]> for DlcInfoParam {
             version,
             entry_count,
             unk0,
-            entry_pointer,
+            entry_ptr,
             entries
         }
     }
@@ -222,11 +222,11 @@ impl From<DlcInfoParam> for Vec<u8> {
         writer.write_le(&dlc_info_param.entry_count).unwrap();
         writer.write_le(&dlc_info_param.unk0).unwrap();
 
-        writer.write_le(&8u64).unwrap(); // Write the pointer to the entries
+        writer.write_le(&8u64).unwrap(); // Write the ptr to the entries
 
         writer.write_le(&dlc_info_param.entries).unwrap();
 
-        fn write_pointer_to_string(
+        fn write_ptr_to_string(
             writer: &mut Cursor<Vec<u8>>,
             string: &String,
             current_offset: u64,
@@ -253,17 +253,17 @@ impl From<DlcInfoParam> for Vec<u8> {
             .enumerate()
             .map(|(i, e)| (((0x78 * i + HEADER_SIZE) as u64, e)))
         {
-            write_pointer_to_string(&mut writer, &entry.steam_app_id, current_offset as u64, 0x0);
-            write_pointer_to_string(&mut writer, &entry.ps5_content_id, current_offset as u64, 0x8);
-            write_pointer_to_string(&mut writer, &entry.ps4_content_id, current_offset as u64, 0x10);
-            write_pointer_to_string(&mut writer, &entry.nintendo_content_id, current_offset as u64, 0x18);
-            write_pointer_to_string(&mut writer, &entry.xbox_content_id, current_offset as u64, 0x20);
-            write_pointer_to_string(&mut writer, &entry.cpk_path, current_offset as u64, 0x38);
-            write_pointer_to_string(&mut writer, &entry.dummy2, current_offset as u64, 0x48);
-            write_pointer_to_string(&mut writer, &entry.dummy3, current_offset as u64, 0x50);
-            write_pointer_to_string(&mut writer, &entry.dummy4, current_offset as u64, 0x58);
-            write_pointer_to_string(&mut writer, &entry.dummy5, current_offset as u64, 0x68);
-            write_pointer_to_string(&mut writer, &entry.dummy6, current_offset as u64, 0x70);
+            write_ptr_to_string(&mut writer, &entry.steam_app_id, current_offset as u64, 0x0);
+            write_ptr_to_string(&mut writer, &entry.ps5_content_id, current_offset as u64, 0x8);
+            write_ptr_to_string(&mut writer, &entry.ps4_content_id, current_offset as u64, 0x10);
+            write_ptr_to_string(&mut writer, &entry.nintendo_content_id, current_offset as u64, 0x18);
+            write_ptr_to_string(&mut writer, &entry.xbox_content_id, current_offset as u64, 0x20);
+            write_ptr_to_string(&mut writer, &entry.cpk_path, current_offset as u64, 0x38);
+            write_ptr_to_string(&mut writer, &entry.dummy2, current_offset as u64, 0x48);
+            write_ptr_to_string(&mut writer, &entry.dummy3, current_offset as u64, 0x50);
+            write_ptr_to_string(&mut writer, &entry.dummy4, current_offset as u64, 0x58);
+            write_ptr_to_string(&mut writer, &entry.dummy5, current_offset as u64, 0x68);
+            write_ptr_to_string(&mut writer, &entry.dummy6, current_offset as u64, 0x70);
         }
 
         // Go to the start of buffer and write the size

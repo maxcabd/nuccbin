@@ -11,10 +11,10 @@ const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Entry {
     #[serde(skip)]
-    pub bgm_name_pointer: u64,
+    pub bgm_name_ptr: u64,
 
     #[serde(skip)]
-    pub bgm_artist_pointer: u64,
+    pub bgm_artist_ptr: u64,
 
     pub bgm_cue_id: u32,
     pub index: u32,
@@ -50,7 +50,7 @@ pub struct AnimeSongBgmParam {
     pub unk0: u16,
 
     #[serde(skip)]
-    pub entry_pointer: u64,
+    pub entry_ptr: u64,
 
     #[br(count = entry_count)]
     pub entries: Vec<Entry>
@@ -87,7 +87,7 @@ impl From<&[u8]> for AnimeSongBgmParam {
         let entry_count = reader.read_le::<u16>().unwrap();
         let unk0 = reader.read_le::<u16>().unwrap();
 
-        let entry_pointer = reader.read_le::<u64>().unwrap();
+        let entry_ptr = reader.read_le::<u64>().unwrap();
 
         let mut entries = Vec::new();
         entries.reserve_exact(entry_count as usize); // Make sure we have enough space to avoid reallocations
@@ -97,10 +97,10 @@ impl From<&[u8]> for AnimeSongBgmParam {
             entries.push(entry);
         }
 
-        fn read_string_from_pointer(reader: &mut Cursor<&[u8]>, pointer: u64, curent_offset: u64) -> String {
-            if pointer != 0 {
+        fn read_string_from_ptr(reader: &mut Cursor<&[u8]>, ptr: u64, curent_offset: u64) -> String {
+            if ptr != 0 {
                 reader.seek(SeekFrom::Start(curent_offset as u64)).unwrap();
-                reader.seek(SeekFrom::Current(pointer as i64)).unwrap();
+                reader.seek(SeekFrom::Current(ptr as i64)).unwrap();
                 reader.read_be::<NullString>().unwrap().to_string()
             } else {
                 String::from("")
@@ -112,8 +112,8 @@ impl From<&[u8]> for AnimeSongBgmParam {
         .enumerate()
         .map(|(i, e)| (((0x28 * i + HEADER_SIZE) as u64, e))) 
         {
-            entry.bgm_name = read_string_from_pointer(&mut reader, entry.bgm_name_pointer, current_offset);
-            entry.bgm_artist = read_string_from_pointer(&mut reader, entry.bgm_artist_pointer, current_offset + 0x8);
+            entry.bgm_name = read_string_from_ptr(&mut reader, entry.bgm_name_ptr, current_offset);
+            entry.bgm_artist = read_string_from_ptr(&mut reader, entry.bgm_artist_ptr, current_offset + 0x8);
             
         }
 
@@ -122,7 +122,7 @@ impl From<&[u8]> for AnimeSongBgmParam {
             version,
             entry_count,
             unk0,
-            entry_pointer,
+            entry_ptr,
             entries
         }
     }
@@ -140,11 +140,11 @@ impl From<AnimeSongBgmParam> for Vec<u8> {
         writer.write_le(&anime_song_bgm_param.entry_count).unwrap();
         writer.write_le(&anime_song_bgm_param.unk0).unwrap();
 
-        writer.write_le(&8u64).unwrap(); // Write the pointer to the entries
+        writer.write_le(&8u64).unwrap(); // Write the ptr to the entries
 
         writer.write_le(&anime_song_bgm_param.entries).unwrap();
 
-        fn write_pointer_to_string(
+        fn write_ptr_to_string(
             writer: &mut Cursor<Vec<u8>>,
             string: &String,
             current_offset: u64,
@@ -171,8 +171,8 @@ impl From<AnimeSongBgmParam> for Vec<u8> {
             .enumerate()
             .map(|(i, e)| (((0x28 * i + HEADER_SIZE) as u64, e)))
         {
-            write_pointer_to_string(&mut writer, &entry.bgm_name, current_offset, 0);
-            write_pointer_to_string(&mut writer, &entry.bgm_artist, current_offset, 0x8);
+            write_ptr_to_string(&mut writer, &entry.bgm_name, current_offset, 0);
+            write_ptr_to_string(&mut writer, &entry.bgm_artist, current_offset, 0x8);
         }
 
         // Update the indices in case they were changed

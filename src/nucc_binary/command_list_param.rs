@@ -4,103 +4,88 @@ use serde::{Serialize, Deserialize};
 
 use super::{NuccBinaryParsed, NuccBinaryType};
 
-
 const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
-
-// Format reversed by EliteAce170 (https://www.youtube.com/c/EliteAce)
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Entry {
-    pub characode_index: u32,
-    pub unk1: i32,
-
     #[serde(skip)]
-    pub bone_name_ptr: u64,
-
-
-    pub animation_start_frame: i32,
-    pub animation_end_frame: i32,
-    pub unk2: i32,
-    pub unk3: i32,
-
+    pub command_link_ptr: u64,
+    #[brw(pad_after = 4)]
+    pub command_order: u32,
+    
     #[serde(skip)]
-    pub effect_name_ptr: u64,
-
+    pub char_name_ptr: u64,
     #[serde(skip)]
-    pub anm1_name_ptr: u64,
-
-    #[serde(skip)]
-    pub anm2_name_ptr: u64,
-
-    #[serde(skip)]
-    pub anm3_name_ptr: u64,
-
-    #[serde(skip)]
-    pub anm4_name_ptr: u64,
-
-    #[serde(skip)]
-    pub anm5_name_ptr: u64,
-
-    pub unk4: f32,
-    pub spawn_location: f32,
-
-    pub common_sound_id: i32,
-
-
-    pub unk5: u32,
-    pub unk6: u32,
-    pub unk7: u32,
-    pub unk8: u32,
-    pub unk9: u32,
+    pub characode_ptr: u64,
 
     #[brw(pad_after = 4)]
-    pub unk10: u32,
+    pub unk1: u32, // some flag
 
+    #[serde(skip)]
+    pub command_name_ptr: u64,
+
+    #[serde(skip)]
+    pub btn_input_ptr: u64,
+    #[serde(skip)]
+    pub condition1_ptr: u64,
+
+    #[serde(skip)]
+    pub condition2_ptr: u64,
+    pub unk2: u32,
+    pub unk3: u32,
+
+    pub command_type: u32, // Usually 2 for a playable character's command list
+    pub unk5: u32, // 0
+    pub unk6: i32,
+    pub unk7: i32,
+
+    #[serde(skip)]
+    pub additional_command_link_ptr: u64,
+   
+    #[brw(ignore)]
+    #[bw(map = |x| x.parse::<u8>().unwrap())]
+    pub command_link: String,
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub bone_name: String,
+    pub char_name: String,
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub effect_name: String,
+    pub characode: String,
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub anm1_name: String,
-
-
-    #[brw(ignore)]
-    #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub anm2_name: String,
+    pub command_name: String,
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub anm3_name: String,
+    pub btn_input: String,
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub anm4_name: String,
+    pub condition1: String,
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub anm5_name: String,
+    pub condition2: String,
+
+    #[brw(ignore)]
+    #[bw(map = |x| x.parse::<u8>().unwrap())]
+    pub additional_command_link: String,
 }
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
-pub struct PlayerDoubleEffectParam {
+pub struct CommandListParam {
     #[serde(skip)]
     pub size: u32,
 
     #[serde(skip)]
     pub version: u32,
 
-    pub entry_count: u16,
-
-    #[serde(skip)]
-    pub unk0: u16,
+    pub entry_count: u32,
 
     #[serde(skip)]
     pub entry_ptr: u64,
@@ -109,9 +94,9 @@ pub struct PlayerDoubleEffectParam {
     pub entries: Vec<Entry>
 }
 
-impl NuccBinaryParsed for PlayerDoubleEffectParam {
+impl NuccBinaryParsed for CommandListParam {
     fn binary_type(&self) -> NuccBinaryType {
-        NuccBinaryType::PlayerDoubleEffectParam
+        NuccBinaryType::CommandListParam
     }
 
     fn extension(&self) -> String {
@@ -130,17 +115,15 @@ impl NuccBinaryParsed for PlayerDoubleEffectParam {
         }
 }
 
-
-impl From<&[u8]> for PlayerDoubleEffectParam {
+impl From<&[u8]> for CommandListParam {
     fn from(data: &[u8]) -> Self {
         let mut reader = Cursor::new(data);
         
         let size = reader.read_be::<u32>().unwrap();
         let version = reader.read_le::<u32>().unwrap();
 
-        let entry_count = reader.read_le::<u16>().unwrap();
-        let unk0 = reader.read_le::<u16>().unwrap();
-
+        let entry_count = reader.read_le::<u32>().unwrap();
+        
         let entry_ptr = reader.read_le::<u64>().unwrap();
 
         let mut entries = Vec::new();
@@ -162,47 +145,43 @@ impl From<&[u8]> for PlayerDoubleEffectParam {
         }
 
         for (current_offset, entry) in entries
-        .iter_mut()
-        .enumerate()
-        .map(|(i, e)| (((0x78 * i + HEADER_SIZE) as u64, e))) 
+            .iter_mut()
+            .enumerate()
+            .map(|(i, e)| (((0x68 * i + HEADER_SIZE) as u64, e))) 
         {
-            entry.bone_name = read_string_from_ptr(&mut reader, entry.bone_name_ptr, current_offset + 0x8);
-            entry.effect_name = read_string_from_ptr(&mut reader, entry.effect_name_ptr, current_offset + 0x20);
-            entry.anm1_name = read_string_from_ptr(&mut reader, entry.anm1_name_ptr, current_offset + 0x28);
-            entry.anm2_name = read_string_from_ptr(&mut reader, entry.anm2_name_ptr, current_offset + 0x30);
-            entry.anm3_name = read_string_from_ptr(&mut reader, entry.anm3_name_ptr, current_offset + 0x38);
-            entry.anm4_name = read_string_from_ptr(&mut reader, entry.anm4_name_ptr, current_offset + 0x40);
-            entry.anm5_name = read_string_from_ptr(&mut reader, entry.anm5_name_ptr, current_offset + 0x48);
+            entry.command_link = read_string_from_ptr(&mut reader, entry.command_link_ptr, current_offset);
+            entry.char_name = read_string_from_ptr(&mut reader, entry.char_name_ptr, current_offset + 0x10);
+            entry.characode = read_string_from_ptr(&mut reader, entry.characode_ptr, current_offset + 0x18);
+            entry.command_name = read_string_from_ptr(&mut reader, entry.command_name_ptr, current_offset + 0x28);
+            entry.btn_input = read_string_from_ptr(&mut reader, entry.btn_input_ptr, current_offset + 0x30);
+            entry.condition1 = read_string_from_ptr(&mut reader, entry.condition1_ptr, current_offset + 0x38);
+            entry.condition2 = read_string_from_ptr(&mut reader, entry.condition2_ptr, current_offset + 0x40);
+            entry.additional_command_link = read_string_from_ptr(&mut reader, entry.additional_command_link_ptr, current_offset + 0x60);
         }
 
         Self {
             size,
             version,
             entry_count,
-            unk0,
             entry_ptr,
             entries
         }
     }
 }
 
-
-impl From<PlayerDoubleEffectParam> for Vec<u8> {
-    fn from(mut player_double_effect_param: PlayerDoubleEffectParam) -> Self {
+impl From<CommandListParam> for Vec<u8> {
+    fn from(mut command_list_param: CommandListParam) -> Self {
         // Consumes the deserialized version and returns the bytes
         let mut writer = Cursor::new(Vec::new());
 
-        player_double_effect_param.entry_count = player_double_effect_param.entries.len() as u16; // Update entry count
+        command_list_param.entry_count = command_list_param.entries.len() as u32; // Update entry count
 
-        writer.write_be(&player_double_effect_param.size).unwrap();
-        writer.write_le(&1000u32).unwrap(); // Write the version
+        writer.write_be(&command_list_param.size).unwrap();
+        writer.write_le(&1001u32).unwrap(); // Write the version
+        writer.write_le(&command_list_param.entry_count).unwrap();
+        writer.write_le(&8u64).unwrap(); // Write the entry ptr offset (always 8)
 
-        writer.write_le(&player_double_effect_param.entry_count).unwrap();
-        writer.write_le(&player_double_effect_param.unk0).unwrap();
-
-        writer.write_le(&8u64).unwrap(); // Write the ptr to the entries
-
-        writer.write_le(&player_double_effect_param.entries).unwrap();
+        writer.write_le(&command_list_param.entries).unwrap();
 
         fn write_ptr_to_string(
             writer: &mut Cursor<Vec<u8>>,
@@ -226,25 +205,31 @@ impl From<PlayerDoubleEffectParam> for Vec<u8> {
                 
             }
         }
-        for (current_offset, entry) in player_double_effect_param.entries
+        for (current_offset, entry) in command_list_param.entries
             .iter_mut()
             .enumerate()
-            .map(|(i, e)| (((0x78 * i + HEADER_SIZE) as u64, e)))
+            .map(|(i, e)| (((0x68 * i + HEADER_SIZE) as u64, e)))
         {
-            write_ptr_to_string(&mut writer, &entry.bone_name, current_offset as u64, 0x8);
-            write_ptr_to_string(&mut writer, &entry.effect_name, current_offset as u64, 0x20);
-            write_ptr_to_string(&mut writer, &entry.anm1_name, current_offset as u64, 0x28);
-            write_ptr_to_string(&mut writer, &entry.anm2_name, current_offset as u64, 0x30);
-            write_ptr_to_string(&mut writer, &entry.anm3_name, current_offset as u64, 0x38);
-            write_ptr_to_string(&mut writer, &entry.anm4_name, current_offset as u64, 0x40);
-            write_ptr_to_string(&mut writer, &entry.anm5_name, current_offset as u64, 0x48);
+            write_ptr_to_string(&mut writer, &entry.command_link, current_offset as u64, 0x0);
+            write_ptr_to_string(&mut writer, &entry.char_name, current_offset as u64, 0x10);
+            write_ptr_to_string(&mut writer, &entry.characode, current_offset as u64, 0x18);
+            write_ptr_to_string(&mut writer, &entry.command_name, current_offset as u64, 0x28);
+            write_ptr_to_string(&mut writer, &entry.btn_input, current_offset as u64, 0x30);
+            write_ptr_to_string(&mut writer, &entry.condition1, current_offset as u64, 0x38);
+            write_ptr_to_string(&mut writer, &entry.condition2, current_offset as u64, 0x40);
+            write_ptr_to_string(&mut writer, &entry.additional_command_link, current_offset as u64, 0x60);
+
+           
         }
 
+        // Go to the start of buffer and write the size
         writer.set_position(0);
         writer.write_be::<u32>(&((writer.get_ref().len() - 4) as u32)).unwrap();
-        
+ 
         writer.into_inner()
-
     }
 }
+
+
+
 

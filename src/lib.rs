@@ -3,6 +3,8 @@ use regex::Regex;
 
 #[derive(Debug, Copy, Clone, EnumString, EnumIter, Display, PartialEq)]
 pub enum NuccBinaryType {
+    AccessoriesParam,
+    AccessoryExceptionParam,
     AccessoryParam,
     AnimeSongBgmParam,
     #[strum(ascii_case_insensitive)]
@@ -10,6 +12,7 @@ pub enum NuccBinaryType {
     CharaPoseParam,
     CharacterSelectParam,
     ComboPrm,
+    CommandListParam,
     CostumeParam,
     Dds,
     DlcInfoParam,
@@ -35,12 +38,15 @@ impl NuccBinaryType {
     pub fn patterns(&self) -> Regex {
 
         match self {
+            NuccBinaryType::AccessoriesParam => { Regex::new(r"(accessoriesParam\.bin)$").unwrap() },
+            NuccBinaryType::AccessoryExceptionParam=> { Regex::new(r"(accessoryExceptionParam\.bin)$").unwrap() },
             NuccBinaryType::AccessoryParam => { Regex::new(r"(accessoryParam\.bin)$").unwrap() },
             NuccBinaryType::AnimeSongBgmParam => { Regex::new(r"(animeSongBgmParam\.bin)$").unwrap() },
             NuccBinaryType::Characode => { Regex::new(r"(characode\.bin)$").unwrap() },
             NuccBinaryType::CharaPoseParam => { Regex::new(r"(CharaPoseParam\.bin)$").unwrap() },
             NuccBinaryType::CharacterSelectParam => { Regex::new(r"(characterSelectParam\.bin)$").unwrap() },
             NuccBinaryType::ComboPrm => { Regex::new(r"(comboPrm\.bin)$").unwrap() },
+            NuccBinaryType::CommandListParam => { Regex::new(r"(commandListParam\.bin)$").unwrap() },
             NuccBinaryType::CostumeParam => { Regex::new(r"(costumeParam\.bin)$").unwrap() },
             NuccBinaryType::Dds => { Regex::new(r"(\.dds)$").unwrap() },
             NuccBinaryType::DlcInfoParam => { Regex::new(r"(DlcInfoParam\.bin)$").unwrap() },

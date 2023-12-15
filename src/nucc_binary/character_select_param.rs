@@ -9,9 +9,10 @@ const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
+#[allow(non_snake_case)]
 pub struct Entry {
     #[serde(skip)]
-    pub entrycode_pointer: u64,
+    pub searchcode_ptr: u64,
 
     pub page_index: u32,
     pub slot_index: u32,
@@ -20,78 +21,110 @@ pub struct Entry {
     pub costume_slot_index: u32,
 
     #[serde(skip)]
-    pub message_id_pointer: u64,
+    pub char_name_ptr: u64,
 
     #[brw(pad_after = 4)]
     pub duel_player_param_model_index: u32,
 
     #[serde(skip)]
-    pub cha_a_id_pointer: u64,
+    pub costume_name_ptr: u64,
 
     #[serde(skip)]
-    pub accessory_pointer: u64,
+    pub accessory_ptr: u64,
 
     #[serde(skip)]
-    pub charsel_pointer: u64,
+    pub crsel_ptr: u64,
+    
+    pub render_settings: RenderSettings,
 
+    #[serde(skip)]
+    pub dictionary_link_ptr: u64,
 
+    #[brw(ignore)]
+    #[bw(map = |x| x.parse::<u8>().unwrap())]
+    pub searchcode: String,
 
-    pub p1_no_select_x: f32,
-    pub p1_no_select_y: f32,
-    pub p1_no_select_z: f32,
+    #[brw(ignore)]
+    #[bw(map = |x| x.parse::<u8>().unwrap())]
+    pub char_name: String,
 
-    pub p2_no_select_x: f32,
-    pub p2_no_select_y: f32,
-    pub p2_no_select_z: f32,
+    #[brw(ignore)]
+    #[bw(map = |x| x.parse::<u8>().unwrap())]
+    pub costume_name: String,
 
-    pub p1_select_x: f32,
-    pub p1_select_y: f32,
-    pub p1_select_z: f32,
+    #[brw(ignore)]
+    #[bw(map = |x| x.parse::<u8>().unwrap())]
+    pub accessory: String,
 
-    pub p2_select_x: f32,
-    pub p2_select_y: f32,
-    pub p2_select_z: f32,
+    #[brw(ignore)]
+    #[bw(map = |x| x.parse::<u8>().unwrap())]
+    pub crsel: String,
 
-    pub p1_vs_x: f32,
-    pub p1_vs_y: f32,
-    pub p1_vs_z: f32,
+    #[brw(ignore)]
+    #[bw(map = |x| x.parse::<u8>().unwrap())]
+    pub dictionary_link: String,
+}
 
-    pub p2_vs_x: f32,
-    pub p2_vs_y: f32,
-    pub p2_vs_z: f32,
+#[allow(non_snake_case)]
+#[binrw]
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RenderSettings {
+    pub ofsX1P: f32,
+    pub ofsY1P: f32,
+    pub ofsZ1P: f32,
 
-    pub p1_rotation_no_select: f32,
-    pub p2_rotation_no_select: f32,
+    pub ofsX2P: f32,
+    pub ofsY2P: f32,
+    pub ofsZ2P: f32,
 
-    pub p1_rotation_select: f32,
-    pub p2_rotation_select: f32,
+    pub selOfsX1P: f32,
+    pub selOfsY1P: f32,
+    pub selOfsZ1P: f32,
 
-    pub p1_rotation_vs: f32,
-    pub p2_rotation_vs: f32,
+    pub selOfsX2P: f32,
+    pub selOfsY2P: f32,
+    pub selOfsZ2P: f32,
 
-    pub p1_lighting_x_no_select: f32,
-    pub p1_lighting_y_no_select: f32,
-    pub p1_lighting_z_no_select: f32,
+    pub vsOfsX1P: f32,
+    pub vsOfsY1P: f32,
+    pub vsOfsZ1P: f32,
 
-    pub p2_lighting_x_no_select: f32,
-    pub p2_lighting_y_no_select: f32,
-    pub p2_lighting_z_no_select: f32,
+    pub vsOfsX2P: f32,
+    pub vsOfsY2P: f32,
+    pub vsOfsZ2P: f32,
 
-    pub p1_lighting_x_select: f32,
-    pub p1_lighting_y_select: f32,
-    pub p1_lighting_z_select: f32,
+    pub rot1P: f32,
+    pub rot2P: f32,
 
-    pub p2_lighting_x_select: f32,
-    pub p2_lighting_y_select: f32,
-    pub p2_lighting_z_select: f32,
+    pub selRot1P: f32,
+    pub selRot2P: f32,
 
-    pub unk_x: f32,
-    pub unk_y: f32,
-    pub unk_z: f32,
+    pub vsRot1P: f32,
+    pub vsRot2P: f32,
 
-    pub unk_x2: f32,
-    pub unk_y2: f32,
-    pub unk_z2: f32,
+    pub lightX1P: f32,
+    pub lightY1P: f32,
+    pub lightZ1P: f32,
+
+    pub lightX2P: f32,
+    pub lightY2P: f32,
+    pub lightZ2P: f32,
+
+    pub selLightX1P: f32,
+    pub selLightY1P: f32,
+    pub selLightZ1P: f32,
+
+    pub selLightX2P: f32,
+    pub selLightY2P: f32,
+    pub selLightZ2P: f32,
+
+    pub vsLightX1P: f32,
+    pub vsLightY1P: f32,
+    pub vsLightZ1P: f32,
+
+    pub vsLightX2P: f32,
+    pub vsLightY2P: f32,
+    pub vsLightZ2P: f32,
 
     pub unk_x3: f32,
     pub unk_y3: f32,
@@ -117,35 +150,6 @@ pub struct Entry {
     pub unk_y8: f32,
     pub unk_z8: f32,
 
-    #[serde(skip)]
-    pub dictionary_pointer: u64,
-
-
-    #[brw(ignore)]
-    #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub entrycode: String,
-
-    #[brw(ignore)]
-    #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub message_id: String,
-
-    #[brw(ignore)]
-    #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub cha_a_id: String,
-
-    #[brw(ignore)]
-    #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub accesory_file: String,
-
-    #[brw(ignore)]
-    #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub charsel_file: String,
-
-    #[brw(ignore)]
-    #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub dictionary_file: String,
-
-
 }
 
 #[binrw]
@@ -163,7 +167,7 @@ pub struct CharacterSelectParam {
     pub unk0: u16,
 
     #[serde(skip)]
-    pub entry_pointer: u64,
+    pub entry_ptr: u64,
 
     #[br(count = entry_count)]
     pub entries: Vec<Entry>
@@ -201,7 +205,7 @@ impl From<&[u8]> for CharacterSelectParam {
         let entry_count = reader.read_le::<u16>().unwrap();
         let unk0 = reader.read_le::<u16>().unwrap();
 
-        let entry_pointer = reader.read_le::<u64>().unwrap();
+        let entry_ptr = reader.read_le::<u64>().unwrap();
 
         let mut entries = Vec::new();
         entries.reserve_exact(entry_count as usize); // Make sure we have enough space to avoid reallocations
@@ -211,10 +215,10 @@ impl From<&[u8]> for CharacterSelectParam {
             entries.push(entry);
         }
 
-        fn read_string_from_pointer(reader: &mut Cursor<&[u8]>, pointer: u64, curent_offset: u64) -> String {
-            if pointer != 0 {
+        fn read_string_from_ptr(reader: &mut Cursor<&[u8]>, ptr: u64, curent_offset: u64) -> String {
+            if ptr != 0 {
                 reader.seek(SeekFrom::Start(curent_offset as u64)).unwrap();
-                reader.seek(SeekFrom::Current(pointer as i64)).unwrap();
+                reader.seek(SeekFrom::Current(ptr as i64)).unwrap();
                 reader.read_be::<NullString>().unwrap().to_string()
             } else {
                 String::from("")
@@ -226,12 +230,12 @@ impl From<&[u8]> for CharacterSelectParam {
         .enumerate()
         .map(|(i, e)| (((0x138 * i + HEADER_SIZE) as u64, e))) 
         {
-            entry.entrycode = read_string_from_pointer(&mut reader, entry.entrycode_pointer, current_offset);
-            entry.message_id = read_string_from_pointer(&mut reader, entry.message_id_pointer, current_offset + 0x18);
-            entry.cha_a_id = read_string_from_pointer(&mut reader, entry.cha_a_id_pointer, current_offset + 0x28);
-            entry.accesory_file = read_string_from_pointer(&mut reader, entry.accessory_pointer, current_offset + 0x30);
-            entry.charsel_file = read_string_from_pointer(&mut reader, entry.charsel_pointer, current_offset + 0x38);
-            entry.dictionary_file = read_string_from_pointer(&mut reader, entry.dictionary_pointer, current_offset + 0x130);
+            entry.searchcode = read_string_from_ptr(&mut reader, entry.searchcode_ptr, current_offset);
+            entry.char_name = read_string_from_ptr(&mut reader, entry.char_name_ptr, current_offset + 0x18);
+            entry.costume_name = read_string_from_ptr(&mut reader, entry.costume_name_ptr, current_offset + 0x28);
+            entry.accessory = read_string_from_ptr(&mut reader, entry.accessory_ptr, current_offset + 0x30);
+            entry.crsel = read_string_from_ptr(&mut reader, entry.crsel_ptr, current_offset + 0x38);
+            entry.dictionary_link = read_string_from_ptr(&mut reader, entry.dictionary_link_ptr, current_offset + 0x130);
         }
 
         Self {
@@ -239,7 +243,7 @@ impl From<&[u8]> for CharacterSelectParam {
             version,
             entry_count,
             unk0,
-            entry_pointer,
+            entry_ptr,
             entries,
         }
 
@@ -258,11 +262,11 @@ impl From<CharacterSelectParam> for Vec<u8> {
         writer.write_le(&character_select_param.entry_count).unwrap();
         writer.write_le(&character_select_param.unk0).unwrap();
 
-        writer.write_le(&8u64).unwrap(); // Write the pointer to the entries
+        writer.write_le(&8u64).unwrap(); // Write the ptr to the entries
 
         writer.write_le(&character_select_param.entries).unwrap();
 
-        fn write_pointer_to_string(
+        fn write_ptr_to_string(
             writer: &mut Cursor<Vec<u8>>,
             string: &String,
             current_offset: u64,
@@ -289,12 +293,12 @@ impl From<CharacterSelectParam> for Vec<u8> {
             .enumerate()
             .map(|(i, e)| (((0x138 * i + HEADER_SIZE) as u64, e)))
         {
-            write_pointer_to_string(&mut writer, &entry.entrycode, current_offset, 0x0);
-            write_pointer_to_string(&mut writer, &entry.message_id, current_offset, 0x18);
-            write_pointer_to_string(&mut writer, &entry.cha_a_id, current_offset, 0x28);
-            write_pointer_to_string(&mut writer, &entry.accesory_file, current_offset, 0x30);
-            write_pointer_to_string(&mut writer, &entry.charsel_file, current_offset, 0x38);
-            write_pointer_to_string(&mut writer, &entry.dictionary_file, current_offset, 0x130);
+            write_ptr_to_string(&mut writer, &entry.searchcode, current_offset, 0x0);
+            write_ptr_to_string(&mut writer, &entry.char_name, current_offset, 0x18);
+            write_ptr_to_string(&mut writer, &entry.costume_name, current_offset, 0x28);
+            write_ptr_to_string(&mut writer, &entry.accessory, current_offset, 0x30);
+            write_ptr_to_string(&mut writer, &entry.crsel, current_offset, 0x38);
+            write_ptr_to_string(&mut writer, &entry.dictionary_link, current_offset, 0x130);
         }
 
         // Go to the start of buffer and write the size

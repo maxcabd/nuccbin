@@ -16,13 +16,13 @@ pub struct Entry {
     pub disable: u32,
 
     #[serde(skip)]
-    pub text1_pointer: u64,
+    pub text1_ptr: u64,
 
     #[serde(skip)]
-    pub text2_pointer: u64,
+    pub text2_ptr: u64,
 
     #[serde(skip)]
-    pub text3_pointer: u64,
+    pub text3_ptr: u64,
   
     pub unk2: u32,
 
@@ -63,7 +63,7 @@ pub struct MessageInfo {
     pub unk0: u16,
 
     #[serde(skip)]
-    pub entry_pointer: u64,
+    pub entry_ptr: u64,
 
     #[br(count = entry_count)]
     pub entries: Vec<Entry>
@@ -100,7 +100,7 @@ impl From<&[u8]> for MessageInfo {
         let entry_count = reader.read_le::<u16>().unwrap();
         let unk0 = reader.read_le::<u16>().unwrap();
 
-        let entry_pointer = reader.read_le::<u64>().unwrap();
+        let entry_ptr = reader.read_le::<u64>().unwrap();
 
         let mut entries = Vec::new();
         entries.reserve_exact(entry_count as usize); // Make sure we have enough space to avoid reallocations
@@ -112,10 +112,10 @@ impl From<&[u8]> for MessageInfo {
 
 
 
-        fn read_string_from_pointer(reader: &mut Cursor<&[u8]>, pointer: u64, curent_offset: u64) -> String {
-            if pointer != 0 {
+        fn read_string_from_ptr(reader: &mut Cursor<&[u8]>, ptr: u64, curent_offset: u64) -> String {
+            if ptr != 0 {
                 reader.seek(SeekFrom::Start(curent_offset as u64)).unwrap();
-                reader.seek(SeekFrom::Current(pointer as i64)).unwrap();
+                reader.seek(SeekFrom::Current(ptr as i64)).unwrap();
                 reader.read_be::<NullString>().unwrap().to_string()
             } else {
                 String::from("")
@@ -127,9 +127,9 @@ impl From<&[u8]> for MessageInfo {
         .enumerate()
         .map(|(i, e)| (((0x30 * i + HEADER_SIZE) as u64, e))) 
         {
-            entry.text1 = read_string_from_pointer(&mut reader, entry.text1_pointer, current_offset + 0x8);
-            entry.text2 = read_string_from_pointer(&mut reader, entry.text2_pointer, current_offset + 0x10);
-            entry.text3 = read_string_from_pointer(&mut reader, entry.text3_pointer, current_offset + 0x18);
+            entry.text1 = read_string_from_ptr(&mut reader, entry.text1_ptr, current_offset + 0x8);
+            entry.text2 = read_string_from_ptr(&mut reader, entry.text2_ptr, current_offset + 0x10);
+            entry.text3 = read_string_from_ptr(&mut reader, entry.text3_ptr, current_offset + 0x18);
         }
 
         Self {
@@ -137,7 +137,7 @@ impl From<&[u8]> for MessageInfo {
             version,
             entry_count,
             unk0,
-            entry_pointer,
+            entry_ptr,
             entries
         }
     }
@@ -155,11 +155,11 @@ impl From<MessageInfo> for Vec<u8> {
         writer.write_le(&message_info.entry_count).unwrap();
         writer.write_le(&message_info.unk0).unwrap();
 
-        writer.write_le(&8u64).unwrap(); // Write the pointer to the entries
+        writer.write_le(&8u64).unwrap(); // Write the ptr to the entries
 
         writer.write_le(&message_info.entries).unwrap();
 
-        fn write_pointer_to_string(
+        fn write_ptr_to_string(
             writer: &mut Cursor<Vec<u8>>,
             string: &String,
             current_offset: u64,
@@ -187,9 +187,9 @@ impl From<MessageInfo> for Vec<u8> {
             .enumerate()
             .map(|(i, e)| (((0x30 * i + HEADER_SIZE) as u64, e)))
         {
-            write_pointer_to_string(&mut writer, &entry.text1, current_offset as u64, 0x8);
-            write_pointer_to_string(&mut writer, &entry.text2, current_offset as u64, 0x10);
-            write_pointer_to_string(&mut writer, &entry.text3, current_offset as u64, 0x18);
+            write_ptr_to_string(&mut writer, &entry.text1, current_offset as u64, 0x8);
+            write_ptr_to_string(&mut writer, &entry.text2, current_offset as u64, 0x10);
+            write_ptr_to_string(&mut writer, &entry.text3, current_offset as u64, 0x18);
             
         }
 
