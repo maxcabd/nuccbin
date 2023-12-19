@@ -10,12 +10,14 @@ mod combo_prm;
 mod command_list_param;
 mod costume_param;
 mod dds;
+mod dictionary_character_param;
 mod dlc_info_param;
 mod effectprm;
 mod ev;
 mod final_sp_skill_cutin;
 mod lua;
 mod message_info;
+mod ougi_finish_param;
 mod player_double_effect_param; 
 mod player_setting_param;
 mod player_icon;
@@ -46,12 +48,14 @@ pub use combo_prm::ComboPrm;
 pub use command_list_param::CommandListParam;
 pub use costume_param::CostumeParam;
 pub use dds::Dds;
+pub use dictionary_character_param::DictionaryCharacterParam;
 pub use dlc_info_param::DlcInfoParam;
 pub use ev::Ev;
 pub use final_sp_skill_cutin::FinalSpSkillCutIn;
 pub use effectprm::EffectPrm;
 pub use lua::Lua;
 pub use message_info::MessageInfo;
+pub use ougi_finish_param::OugiFinishParam;
 pub use player_double_effect_param::PlayerDoubleEffectParam;
 pub use player_setting_param::PlayerSettingParam;
 pub use player_icon::PlayerIcon;
@@ -105,6 +109,7 @@ impl From<NuccBinaryParsedReader<'_>> for Box<dyn NuccBinaryParsed> {
             NuccBinaryType::CommandListParam => Box::new(CommandListParam::from(&data[..])),
             NuccBinaryType::CostumeParam => Box::new(CostumeParam::from(&data[..])),
             NuccBinaryType::Dds => Box::new(Dds::from(&data[..])),
+            NuccBinaryType::DictionaryCharacterParam => Box::new(DictionaryCharacterParam::from(&data[..])),
             NuccBinaryType::DlcInfoParam => Box::new(DlcInfoParam::from(&data[..])),
 
             NuccBinaryType::EffectPrm => {
@@ -121,6 +126,7 @@ impl From<NuccBinaryParsedReader<'_>> for Box<dyn NuccBinaryParsed> {
 
             NuccBinaryType::Lua => Box::new(Lua::from(&data[..])),
             NuccBinaryType::MessageInfo => Box::new(MessageInfo::from(&data[..])),
+            NuccBinaryType::OugiFinishParam => Box::new(OugiFinishParam::from(&data[..])),
             NuccBinaryType::PlayerDoubleEffectParam => Box::new(PlayerDoubleEffectParam::from(&data[..])),
             NuccBinaryType::PlayerSettingParam => Box::new(PlayerSettingParam::from(&data[..])),
             NuccBinaryType::PlayerIcon => Box::new(PlayerIcon::from(&data[..])),
@@ -189,6 +195,7 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
             NuccBinaryType::CommandListParam => { (*boxed.downcast::<CommandListParam>().ok().unwrap()).into() },
             NuccBinaryType::CostumeParam => { (*boxed.downcast::<CostumeParam>().ok().unwrap()).into() },
             NuccBinaryType::Dds => { (*boxed.downcast::<Dds>().ok().unwrap()).into() },
+            NuccBinaryType::DictionaryCharacterParam => { (*boxed.downcast::<DictionaryCharacterParam>().ok().unwrap()).into() },
             NuccBinaryType::DlcInfoParam => { (*boxed.downcast::<DlcInfoParam>().ok().unwrap()).into() },
             NuccBinaryType::EffectPrm => {
                 let mut effect_prm = Cursor::new(Vec::new());
@@ -211,6 +218,7 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
             NuccBinaryType::FinalSpSkillCutIn => { (*boxed.downcast::<FinalSpSkillCutIn>().ok().unwrap()).into() },
             NuccBinaryType::Lua => { (*boxed.downcast::<Lua>().ok().unwrap()).into() },
             NuccBinaryType::MessageInfo => { (*boxed.downcast::<MessageInfo>().ok().unwrap()).into() },
+            NuccBinaryType::OugiFinishParam => { (*boxed.downcast::<OugiFinishParam>().ok().unwrap()).into() },
             NuccBinaryType::PlayerDoubleEffectParam => { (*boxed.downcast::<PlayerDoubleEffectParam>().ok().unwrap()).into() },
             NuccBinaryType::PlayerSettingParam => { (*boxed.downcast::<PlayerSettingParam>().ok().unwrap()).into() },
             NuccBinaryType::PlayerIcon => { (*boxed.downcast::<PlayerIcon>().ok().unwrap()).into() },
@@ -286,12 +294,14 @@ impl From<NuccBinaryParsedDeserializer> for Box<dyn NuccBinaryParsed> {
             NuccBinaryType::CommandListParam => Box::new(CommandListParam::deserialize(&data)),
             NuccBinaryType::CostumeParam => Box::new(CostumeParam::deserialize(&data)),
             NuccBinaryType::Dds => Box::new(Dds::deserialize(&data)),
+            NuccBinaryType::DictionaryCharacterParam => Box::new(DictionaryCharacterParam::deserialize(&data)),
             NuccBinaryType::DlcInfoParam => Box::new(DlcInfoParam::deserialize(&data)),
             NuccBinaryType::EffectPrm => Box::new(EffectPrm::deserialize(&data)),
             NuccBinaryType::Ev => Box::new(Ev::deserialize(&data)),
             NuccBinaryType::FinalSpSkillCutIn => Box::new(FinalSpSkillCutIn::deserialize(&data)),
             NuccBinaryType::Lua => Box::new(Lua::deserialize(&data)),
             NuccBinaryType::MessageInfo => Box::new(MessageInfo::deserialize(&data)),
+            NuccBinaryType::OugiFinishParam => Box::new(OugiFinishParam::deserialize(&data)),
             NuccBinaryType::PlayerDoubleEffectParam => Box::new(PlayerDoubleEffectParam::deserialize(&data)),
             NuccBinaryType::PlayerSettingParam => Box::new(PlayerSettingParam::deserialize(&data)),
             NuccBinaryType::PlayerIcon => Box::new(PlayerIcon::deserialize(&data)),

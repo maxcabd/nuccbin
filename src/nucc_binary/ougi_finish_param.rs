@@ -7,67 +7,84 @@ use super::{NuccBinaryParsed, NuccBinaryType};
 
 const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
 
-// Format reversed by Kuroha Saenoki (https://www.youtube.com/@KurohaSaenoki)
-#[allow(non_snake_case)]
+// Format reversed by Portable Productions (https://www.youtube.com/@PortableProductions)
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Entry {
     #[serde(skip)]
-    pub accessory_name_id_ptr: u64,
+    pub char_name_ptr: u64,
 
     #[serde(skip)]
-    pub accessory_link_ptr: u64,
+    pub ougi_fin_link_ptr: u64,
 
     pub index: u32,
+    pub spl_fin_index: u32,
+
+    #[serde(skip)]
+    pub spl_fin_ptr: u64,
+
+    #[serde(skip)]
+    pub spl_fin_path_ptr: u64,
+
+    #[serde(skip)]
+    pub spl_fin_small_ptr: u64,
+
+    #[serde(skip)]
+    pub spl_fin_big_ptr: u64,
+
     pub price: u32,
+    pub beginning_id: u32,
 
     #[serde(skip)]
-    pub icon_ptr: u64,
+    pub search_code_ptr: u64,
+
     #[serde(skip)]
-    pub accessory_ptr: u64,
-
-    pub ofsX: i32, // Left/Right
-    pub ofsZ: i32, // Towards/Away from camera
-    pub ofsY: i32, // Up/Down
-
-    pub rotY: i32, // Up/Down
-    pub rotZ: i32, // Left/Right
-    pub rotX: i32, // Left/Right
-
-    #[brw(pad_after = 4)]
-    pub unlock_condition: u32,
-
+    pub section_id_ptr: u64,
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub accessory_name_id: String,
+    pub char_name: String,
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub accessory_link: String,
+    pub ougi_fin_link: String,
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub icon: String,
+    pub spl_fin: String,
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub accessory: String,
+    pub spl_fin_path: String,
+
+    #[brw(ignore)]
+    #[bw(map = |x| x.parse::<u8>().unwrap())]
+    pub spl_fin_small: String,
+
+    #[brw(ignore)]
+    #[bw(map = |x| x.parse::<u8>().unwrap())]
+    pub spl_fin_big: String,
+
+    #[brw(ignore)]
+    #[bw(map = |x| x.parse::<u8>().unwrap())]
+    pub search_code: String,
+
+    #[brw(ignore)]
+    #[bw(map = |x| x.parse::<u8>().unwrap())]
+    pub section_id: String
+
 }
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
-pub struct AccessoriesParam {
+pub struct OugiFinishParam {
     #[serde(skip)]
     pub size: u32,
 
     #[serde(skip)]
     pub version: u32,
 
-    pub entry_count: u16,
-
-    #[serde(skip)]
-    pub unk0: u16,
+    pub entry_count: u32,
 
     #[serde(skip)]
     pub entry_ptr: u64,
@@ -76,9 +93,9 @@ pub struct AccessoriesParam {
     pub entries: Vec<Entry>
 }
 
-impl NuccBinaryParsed for AccessoriesParam {
+impl NuccBinaryParsed for OugiFinishParam {
     fn binary_type(&self) -> NuccBinaryType {
-        NuccBinaryType::AccessoriesParam
+        NuccBinaryType::OugiFinishParam
     }
 
     fn extension(&self) -> String {
@@ -97,16 +114,13 @@ impl NuccBinaryParsed for AccessoriesParam {
         }
 }
 
-impl From<&[u8]> for AccessoriesParam {
+impl From<&[u8]> for OugiFinishParam {
     fn from(data: &[u8]) -> Self {
         let mut reader = Cursor::new(data);
         
         let size = reader.read_be::<u32>().unwrap();
         let version = reader.read_le::<u32>().unwrap();
-
-        let entry_count = reader.read_le::<u16>().unwrap();
-        let unk0 = reader.read_le::<u16>().unwrap();
-
+        let entry_count = reader.read_le::<u32>().unwrap();
         let entry_ptr = reader.read_le::<u64>().unwrap();
 
         let mut entries = Vec::new();
@@ -116,7 +130,6 @@ impl From<&[u8]> for AccessoriesParam {
             let entry = reader.read_le::<Entry>().unwrap();
             entries.push(entry);
         }
-
 
         fn read_string_from_ptr(reader: &mut Cursor<&[u8]>, ptr: u64, curent_offset: u64) -> String {
             if ptr != 0 {
@@ -131,19 +144,22 @@ impl From<&[u8]> for AccessoriesParam {
         for (current_offset, entry) in entries
         .iter_mut()
         .enumerate()
-        .map(|(i, e)| (((0x48 * i + HEADER_SIZE) as u64, e))) 
+        .map(|(i, e)| (((0x50 * i + HEADER_SIZE) as u64, e))) 
         {
-            entry.accessory_name_id = read_string_from_ptr(&mut reader, entry.accessory_name_id_ptr, current_offset as u64);
-            entry.accessory_link = read_string_from_ptr(&mut reader, entry.accessory_link_ptr, current_offset + 0x8);
-            entry.icon = read_string_from_ptr(&mut reader, entry.icon_ptr, current_offset + 0x18);
-            entry.accessory = read_string_from_ptr(&mut reader, entry.accessory_ptr, current_offset + 0x20);
+            entry.char_name = read_string_from_ptr(&mut reader, entry.char_name_ptr, current_offset as u64);
+            entry.ougi_fin_link = read_string_from_ptr(&mut reader, entry.ougi_fin_link_ptr, current_offset + 0x8);
+            entry.spl_fin = read_string_from_ptr(&mut reader, entry.spl_fin_ptr, current_offset + 0x18);
+            entry.spl_fin_path = read_string_from_ptr(&mut reader, entry.spl_fin_path_ptr, current_offset + 0x20);
+            entry.spl_fin_small = read_string_from_ptr(&mut reader, entry.spl_fin_small_ptr, current_offset + 0x28);
+            entry.spl_fin_big = read_string_from_ptr(&mut reader, entry.spl_fin_big_ptr, current_offset + 0x30);
+            entry.search_code = read_string_from_ptr(&mut reader, entry.search_code_ptr, current_offset + 0x40);
+            entry.section_id = read_string_from_ptr(&mut reader, entry.section_id_ptr, current_offset + 0x48);
         }
 
         Self {
             size,
             version,
             entry_count,
-            unk0,
             entry_ptr,
             entries
         }
@@ -151,22 +167,20 @@ impl From<&[u8]> for AccessoriesParam {
     }
 }
 
-impl From<AccessoriesParam> for Vec<u8> {
-    fn from(mut accessories_param: AccessoriesParam) -> Self {
+impl From<OugiFinishParam> for Vec<u8> {
+    fn from(mut ougi_finish_param: OugiFinishParam) -> Self {
         let mut writer = Cursor::new(Vec::new());
 
-        accessories_param.entry_count = accessories_param.entries.len() as u16; // Update entry count
+        ougi_finish_param.entry_count = ougi_finish_param.entries.len() as u32; // Update entry count
 
-        writer.write_be(&accessories_param.size).unwrap();
+        writer.write_be(&ougi_finish_param.size).unwrap();
         writer.write_le(&1000u32).unwrap(); // Write the version
 
-        writer.write_le(&accessories_param.entry_count).unwrap();
-        writer.write_le(&accessories_param.unk0).unwrap();
+        writer.write_le(&ougi_finish_param.entry_count).unwrap();
 
         writer.write_le(&8u64).unwrap(); // Write the ptr to the entries
 
-
-        writer.write_le(&accessories_param.entries).unwrap();
+        writer.write_le(&ougi_finish_param.entries).unwrap();
 
         fn write_ptr_to_string(
             writer: &mut Cursor<Vec<u8>>,
@@ -190,19 +204,23 @@ impl From<AccessoriesParam> for Vec<u8> {
                 
             }
         }
-        for (current_offset, entry) in accessories_param.entries
+        for (current_offset, entry) in ougi_finish_param.entries
             .iter_mut()
             .enumerate()
-            .map(|(i, e)| (((0x48 * i + HEADER_SIZE) as u64, e)))
+            .map(|(i, e)| (((0x50 * i + HEADER_SIZE) as u64, e)))
         {
-            write_ptr_to_string(&mut writer, &entry.accessory_name_id, current_offset as u64, 0x0);
-            write_ptr_to_string(&mut writer, &entry.accessory_link, current_offset as u64, 0x8);
-            write_ptr_to_string(&mut writer, &entry.icon, current_offset as u64, 0x18);
-            write_ptr_to_string(&mut writer, &entry.accessory, current_offset as u64, 0x20);
+            write_ptr_to_string(&mut writer, &entry.char_name, current_offset as u64, 0x0);
+            write_ptr_to_string(&mut writer, &entry.ougi_fin_link, current_offset as u64, 0x8);
+            write_ptr_to_string(&mut writer, &entry.spl_fin, current_offset as u64, 0x18);
+            write_ptr_to_string(&mut writer, &entry.spl_fin_path, current_offset as u64, 0x20);
+            write_ptr_to_string(&mut writer, &entry.spl_fin_small, current_offset as u64, 0x28);
+            write_ptr_to_string(&mut writer, &entry.spl_fin_big, current_offset as u64, 0x30);
+            write_ptr_to_string(&mut writer, &entry.search_code, current_offset as u64, 0x40);
+            write_ptr_to_string(&mut writer, &entry.section_id, current_offset as u64, 0x48);
         }
 
         // Update the indices in case they were changed
-        for (i, entry) in accessories_param.entries.iter_mut().enumerate() {
+        for (i, entry) in ougi_finish_param.entries.iter_mut().enumerate() {
             entry.index = i as u32;
         }
 
@@ -211,5 +229,10 @@ impl From<AccessoriesParam> for Vec<u8> {
         writer.write_be::<u32>(&((writer.get_ref().len() - 4) as u32)).unwrap();
 
         writer.into_inner()
+
     }
 }
+
+
+
+

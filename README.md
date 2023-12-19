@@ -21,11 +21,13 @@ nuccbin supports a number of in game nuccChunkBinary param / bin formats. All fo
 | [commmandListParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/command_list_param.rs) | ✔️ | ✔️ | `json` |
 | [costumeParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/costume_param.rs) | ✔️ | ✔️ | `json` |
 | [dds](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/dds.rs) | ✔️ | ✔️ |  `dds` |
+| [DictionaryCharacterParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/dictionary_character_param.rs) | ✔️ | ✔️ |  `dds` |
 | [DlcInfoParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/dlc_info_param.rs) | ✔️ | ✔️ | `json` |
 | [effectprm](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/effectprm.rs) | ✔️ | ✔️ | `json` | 
 | [ev](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/ev.rs) | ✔️ | ✔️ | `json` | 
 | [lua](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/lua.rs) | ✔️ | ✔️ | `lua` | 
 | [messageInfo](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/message_info.rs) | ✔️ | ✔️ | `json` | 
+| [OugiFinishParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/message_info.rs) | ✔️ | ✔️ | `json` | 
 | [playerDoubleEffectParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/player_double_effect_param.rs) | ✔️ | ✔️ | `json` |
 | [playerSettingParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/player_setting_param.rs) | ✔️ | ✔️ | `json` | 
 | [player_icon](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/player_icon.rs) | ✔️ | ✔️ | `json` | 

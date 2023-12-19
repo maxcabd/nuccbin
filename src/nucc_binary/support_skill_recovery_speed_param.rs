@@ -34,10 +34,7 @@ pub struct SupportSkillRecoverySpeedParam {
     #[bw(calc = 1001)]
     pub version: u32,
 
-    pub entry_count: u16,
-
-    #[serde(skip)]
-    pub unk0: u16,
+    pub entry_count: u32,
 
     #[serde(skip)]
     #[bw(calc = 0x8)]

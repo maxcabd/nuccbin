@@ -4,7 +4,6 @@ use serde::{Serialize, Deserialize};
 
 use super::{NuccBinaryParsed, NuccBinaryType};
 
-
 const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
 
 #[binrw]
