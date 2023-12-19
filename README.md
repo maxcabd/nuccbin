@@ -27,7 +27,7 @@ nuccbin supports a number of in game nuccChunkBinary param / bin formats. All fo
 | [ev](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/ev.rs) | ✔️ | ✔️ | `json` | 
 | [lua](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/lua.rs) | ✔️ | ✔️ | `lua` | 
 | [messageInfo](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/message_info.rs) | ✔️ | ✔️ | `json` | 
-| [OugiFinishParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/message_info.rs) | ✔️ | ✔️ | `json` | 
+| [OugiFinishParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/ougi_finish_param.rs) | ✔️ | ✔️ | `json` | 
 | [playerDoubleEffectParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/player_double_effect_param.rs) | ✔️ | ✔️ | `json` |
 | [playerSettingParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/player_setting_param.rs) | ✔️ | ✔️ | `json` | 
 | [player_icon](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/player_icon.rs) | ✔️ | ✔️ | `json` | 
