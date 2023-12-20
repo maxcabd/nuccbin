@@ -1,3 +1,6 @@
+pub mod xfbin;
+pub mod nucc_binary;
+
 use strum_macros::{EnumString, EnumIter, Display};
 use regex::Regex;
 
@@ -71,5 +74,24 @@ impl NuccBinaryType {
             NuccBinaryType::SupportSkillRecoverySpeedParam => { Regex::new(r"(supportSkillRecoverySpeedParam\.bin)$").unwrap() },
             NuccBinaryType::Xml => { Regex::new(r"(\.xml)$").unwrap() }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::Path;
+    use crate::xfbin::read_xfbin;
+    use crate::nucc_binary::*;
+    use super::NuccBinaryType;
+      
+    #[test]
+    fn characode_test() {
+        let xfbin = read_xfbin(Path::new("characode.bin.xfbin"));
+        let data = xfbin.get_chunk_by_type("nuccChunkBinary")[0].data.as_bytes();
+
+        let reader = NuccBinaryParsedReader(NuccBinaryType::Characode, &data);
+        let nucc_binary_parsed: Box<dyn NuccBinaryParsed> = reader.into();
+        let characode = nucc_binary_parsed.as_any().downcast_ref::<Characode>().unwrap();
+        dbg!(characode);
     }
 }
