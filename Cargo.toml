@@ -27,3 +27,6 @@ regex = "1.4.3"
 
 # used for serde support for hex strings
 hex = { version = "0.4", features = ["std", "serde"] }
+
+# used for reading and writing xfbin files
+xfbin = { path = "../xfbin" }
