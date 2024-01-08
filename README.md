@@ -4,8 +4,8 @@ A tool to serialize/deserialize several nuccChunkBinary .xfbin's from Ultimate N
 ## Usage
 - Get the latest version from [releases](https://github.com/maxcabd/nuccbin/releases).
 - Drag and drop any of the .xfbin files in the list onto the nuccbin.exe.
-- Add the changes to your .json file by adding, removing, or editing entries.
-- Apply your changes to the .xfbin file by dragging and dropping your .meta.json onto the nuccbin.exe.
+- Add the changes to your .json file(s) by adding, removing, or editing entries.
+- Apply your changes to the .xfbin file by dragging and dropping the newly created folder onto nuccbin.exe.
 
 ## Formats
 nuccbin supports a number of in game nuccChunkBinary param / bin formats. All formats support serializing. While some may not support deserializing.
@@ -14,11 +14,13 @@ nuccbin supports a number of in game nuccChunkBinary param / bin formats. All fo
 | [accessoriesParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/accessories_param.rs) | ✔️ | ✔️ | `json` |
 | [accessoryParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/accessory_param.rs) | ✔️ | ✔️ | `json` |
 | [animeSongBgmParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/anime_song_bgm_param.rs) | ✔️ | ✔️ | `json` |
+| [anmofs](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/anm_offset.rs) | ✔️ | ✔️ | `json` |
 | [characode](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/characode.rs) | ✔️ | ✔️  | `json` |
 | [CharaPoseParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/chara_pose_param.rs) | ✔️ | ✔️ | `json` |
 | [characterSelectParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/character_select_param.rs) | ✔️ | ✔️ | `json` |
 | [comboPrm](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/combo_prm.rs) | ✔️ | ✔️ | `json` |
 | [commmandListParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/command_list_param.rs) | ✔️ | ✔️ | `json` |
+| [costumeBreakParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/costume_break_param.rs) | ✔️ | ✔️ | `json` |
 | [costumeParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/costume_param.rs) | ✔️ | ✔️ | `json` |
 | [dds](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/dds.rs) | ✔️ | ✔️ |  `dds` |
 | [DictionaryCharacterParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/dictionary_character_param.rs) | ✔️ | ✔️ |  `dds` |
@@ -27,13 +29,14 @@ nuccbin supports a number of in game nuccChunkBinary param / bin formats. All fo
 | [ev](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/ev.rs) | ✔️ | ✔️ | `json` | 
 | [lua](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/lua.rs) | ✔️ | ✔️ | `lua` | 
 | [messageInfo](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/message_info.rs) | ✔️ | ✔️ | `json` | 
-| [OugiFinishParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/ougi_finish_param.rs) | ✔️ | ✔️ | `json` | 
+| [OugiFinishParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/message_info.rs) | ✔️ | ✔️ | `json` | 
 | [playerDoubleEffectParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/player_double_effect_param.rs) | ✔️ | ✔️ | `json` |
 | [playerSettingParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/player_setting_param.rs) | ✔️ | ✔️ | `json` | 
 | [player_icon](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/player_icon.rs) | ✔️ | ✔️ | `json` | 
 | [prm_load](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/player_icon.rs) | ✔️ | ✔️ | `json` |
 | [prohibitedSubstringParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/prohibited_substring_param) | ✔️ | ✔️ | `json` |
 | [skillIndexSettingParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/skill_index_setting_param.rs) | ✔️ | ✔️ | `json` |
+| [snd](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/snd.rs) | ✔️ | ✔️ | `json` |
 | [staffRollTextParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/staff_roll_text_param.rs) | ✔️ | ❌ | `json` | 
 | [supportActionParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/support_action_param.rs) | ✔️ | ✔️ | `json` |
 | [supportSkillRecoverySpeedParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/support_skill_recovery_speed_param.rs) | ✔️ | ✔️ | `json` |

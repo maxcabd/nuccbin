@@ -2,12 +2,13 @@ mod accessories_param;
 mod accessory_exception_param;
 mod accessory_param;
 mod anime_song_bgm_param;
-mod anmoffset;
+mod anm_offset;
 mod characode;
 mod chara_pose_param;
 mod character_select_param;
 mod combo_prm;
 mod command_list_param;
+mod costume_break_param;
 mod costume_param;
 mod dds;
 mod dictionary_character_param;
@@ -25,6 +26,7 @@ mod png;
 mod prm_load;
 mod prohibited_substring_param;
 mod skill_index_setting_param;
+mod snd;
 mod staff_roll_text_param;
 mod support_action_param;
 mod support_skill_recovery_speed_param;
@@ -34,18 +36,20 @@ use binrw::{BinReaderExt, BinWriterExt};
 use binrw::io::Cursor;
 use downcast_rs::{impl_downcast, Downcast};
 
-use super::NuccBinaryType;
+use nuccbin::NuccBinaryType;
 
 //--------------------//
 pub use accessories_param::AccessoriesParam;
 pub use accessory_exception_param::AccessoryExceptionParam;
 pub use accessory_param::AccessoryParam;
 pub use anime_song_bgm_param::AnimeSongBgmParam;
+pub use anm_offset::Anmofs;
 pub use characode::Characode;
 pub use chara_pose_param::CharaPoseParam;
 pub use character_select_param::CharacterSelectParam;
 pub use combo_prm::ComboPrm;
 pub use command_list_param::CommandListParam;
+pub use costume_break_param::CostumeBreakParam;
 pub use costume_param::CostumeParam;
 pub use dds::Dds;
 pub use dictionary_character_param::DictionaryCharacterParam;
@@ -63,6 +67,7 @@ pub use png::Png;
 pub use prm_load::PrmLoad;
 pub use prohibited_substring_param::ProhibitedSubstringParam;
 pub use skill_index_setting_param::SkillIndexSettingParam;
+pub use snd::Snd;
 pub use staff_roll_text_param::StaffRollTextParam;
 pub use support_action_param::SupportActionParam;
 pub use support_skill_recovery_speed_param::SupportSkillRecoverySpeedParam;
@@ -92,6 +97,10 @@ impl From<NuccBinaryParsedReader<'_>> for Box<dyn NuccBinaryParsed> {
             NuccBinaryType::AccessoryExceptionParam => Box::new(AccessoryExceptionParam::from(&data[..])),
             NuccBinaryType::AccessoryParam => Box::new(AccessoryParam::from(&data[..])),
             NuccBinaryType::AnimeSongBgmParam => Box::new(AnimeSongBgmParam::from(&data[..])),
+            NuccBinaryType::Anmofs => {
+                let mut anm_offset = Cursor::new(data);
+                Box::new(anm_offset.read_le::<Anmofs>().unwrap())
+            }
             
             NuccBinaryType::Characode => {
                 let mut characode = Cursor::new(data);
@@ -107,6 +116,7 @@ impl From<NuccBinaryParsedReader<'_>> for Box<dyn NuccBinaryParsed> {
             }
 
             NuccBinaryType::CommandListParam => Box::new(CommandListParam::from(&data[..])),
+            NuccBinaryType::CostumeBreakParam => Box::new(CostumeBreakParam::from(&data[..])),
             NuccBinaryType::CostumeParam => Box::new(CostumeParam::from(&data[..])),
             NuccBinaryType::Dds => Box::new(Dds::from(&data[..])),
             NuccBinaryType::DictionaryCharacterParam => Box::new(DictionaryCharacterParam::from(&data[..])),
@@ -144,6 +154,11 @@ impl From<NuccBinaryParsedReader<'_>> for Box<dyn NuccBinaryParsed> {
                 Box::new(skill_index_setting_param.read_le::<SkillIndexSettingParam>().unwrap())
             }
 
+            NuccBinaryType::Snd => {
+                let mut snd = Cursor::new(data);
+                Box::new(snd.read_le::<Snd>().unwrap())
+            }
+
             NuccBinaryType::StaffRollTextParam => Box::new(StaffRollTextParam::from(&data[..])),
 
             NuccBinaryType::SupportActionParam => {
@@ -172,6 +187,15 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
             NuccBinaryType::AccessoryExceptionParam => { (*boxed.downcast::<AccessoryExceptionParam>().ok().unwrap()).into() },
             NuccBinaryType::AccessoryParam => { (*boxed.downcast::<AccessoryParam>().ok().unwrap()).into() },
             NuccBinaryType::AnimeSongBgmParam => { (*boxed.downcast::<AnimeSongBgmParam>().ok().unwrap()).into() },
+
+            NuccBinaryType::Anmofs => {
+                let mut anm_offset = Cursor::new(Vec::new());
+                anm_offset.write_le(&*boxed.downcast::<Anmofs>().ok().unwrap()).unwrap();
+                
+                anm_offset.set_position(0);
+                anm_offset.write_be::<u32>(&((anm_offset.get_ref().len() - 4) as u32)).unwrap();
+                anm_offset.into_inner()
+            },
             NuccBinaryType::Characode => {
                 let mut characode = Cursor::new(Vec::new());
                 characode.write_le(&*boxed.downcast::<Characode>().ok().unwrap()).unwrap();
@@ -193,6 +217,7 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
             },
 
             NuccBinaryType::CommandListParam => { (*boxed.downcast::<CommandListParam>().ok().unwrap()).into() },
+            NuccBinaryType::CostumeBreakParam => { (*boxed.downcast::<CostumeBreakParam>().ok().unwrap()).into() },
             NuccBinaryType::CostumeParam => { (*boxed.downcast::<CostumeParam>().ok().unwrap()).into() },
             NuccBinaryType::Dds => { (*boxed.downcast::<Dds>().ok().unwrap()).into() },
             NuccBinaryType::DictionaryCharacterParam => { (*boxed.downcast::<DictionaryCharacterParam>().ok().unwrap()).into() },
@@ -242,6 +267,15 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
                 skill_index_setting_param.into_inner()
             },
 
+            NuccBinaryType::Snd => {
+                let mut snd = Cursor::new(Vec::new());
+                snd.write_le(&*boxed.downcast::<Snd>().ok().unwrap()).unwrap();
+                
+                snd.set_position(0);
+                snd.write_be::<u32>(&((snd.get_ref().len() - 4) as u32)).unwrap();
+                snd.into_inner()
+            },
+
             NuccBinaryType::StaffRollTextParam => { (*boxed.downcast::<StaffRollTextParam>().ok().unwrap()).into() },
             NuccBinaryType::SupportActionParam => {
                 let mut support_action_param = Cursor::new(Vec::new());
@@ -287,11 +321,13 @@ impl From<NuccBinaryParsedDeserializer> for Box<dyn NuccBinaryParsed> {
             NuccBinaryType::AccessoryExceptionParam => Box::new(AccessoryExceptionParam::deserialize(&data)),
             NuccBinaryType::AccessoryParam => Box::new(AccessoryParam::deserialize(&data)),
             NuccBinaryType::AnimeSongBgmParam => Box::new(AnimeSongBgmParam::deserialize(&data)),
+            NuccBinaryType::Anmofs => Box::new(Anmofs::deserialize(&data)),
             NuccBinaryType::Characode => Box::new(Characode::deserialize(&data)),
             NuccBinaryType::CharaPoseParam => Box::new(CharaPoseParam::deserialize(&data)),
             NuccBinaryType::CharacterSelectParam => Box::new(CharacterSelectParam::deserialize(&data)),
             NuccBinaryType::ComboPrm => Box::new(ComboPrm::deserialize(&data)),
             NuccBinaryType::CommandListParam => Box::new(CommandListParam::deserialize(&data)),
+            NuccBinaryType::CostumeBreakParam => Box::new(CostumeBreakParam::deserialize(&data)),
             NuccBinaryType::CostumeParam => Box::new(CostumeParam::deserialize(&data)),
             NuccBinaryType::Dds => Box::new(Dds::deserialize(&data)),
             NuccBinaryType::DictionaryCharacterParam => Box::new(DictionaryCharacterParam::deserialize(&data)),
@@ -309,6 +345,7 @@ impl From<NuccBinaryParsedDeserializer> for Box<dyn NuccBinaryParsed> {
             NuccBinaryType::PrmLoad => Box::new(PrmLoad::deserialize(&data)),
             NuccBinaryType::ProhibitedSubstringParam => Box::new(ProhibitedSubstringParam::deserialize(&data)),
             NuccBinaryType::SkillIndexSettingParam => Box::new(SkillIndexSettingParam::deserialize(&data)),
+            NuccBinaryType::Snd => Box::new(Snd::deserialize(&data)),
             NuccBinaryType::StaffRollTextParam => Box::new(StaffRollTextParam::deserialize(&data)),
             NuccBinaryType::SupportActionParam => Box::new(SupportActionParam::deserialize(&data)),
             NuccBinaryType::SupportSkillRecoverySpeedParam => Box::new(SupportSkillRecoverySpeedParam::deserialize(&data)),

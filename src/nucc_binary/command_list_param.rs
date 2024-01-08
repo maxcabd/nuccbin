@@ -20,7 +20,7 @@ pub struct Entry {
     pub characode_ptr: u64,
 
     #[brw(pad_after = 4)]
-    pub unk1: u32, // some flag
+    pub costume_index: u32, // some flag
 
     #[serde(skip)]
     pub command_name_ptr: u64,

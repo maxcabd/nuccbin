@@ -1,14 +1,14 @@
 use std::path::PathBuf;
 
 #[derive(Clone)]
-pub struct ArgsConfig {
+pub struct Args {
     pub filepath: PathBuf,
     pub directory: String,
     pub filename: String,
     pub extension: String,
 }
 
-impl ArgsConfig {
+impl Args {
     pub fn new() -> Result<Self, &'static str> {
         let args: Vec<String> = std::env::args().collect();
 
