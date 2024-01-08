@@ -1,10 +1,14 @@
-/*use binrw::{binrw, BinReaderExt, BinWriterExt, NullString};
+use binrw::{binrw, BinReaderExt, BinWriterExt, NullString};
 use binrw::io::{Cursor, Seek, SeekFrom};
 use serde::{Serialize, Deserialize};
 
 
 use super::{NuccBinaryParsed, NuccBinaryType};
 
+const ANM_STR_LEN: usize = 0x40;
+const CHARACODE_LEN: usize = 0x10;
+
+#[allow(non_snake_case)]
 #[binrw]
 #[brw(little)]
 #[derive(Serialize, Deserialize, Debug)]
@@ -12,37 +16,33 @@ pub struct Entry { // param entry, looks like each entry is 0x24 bytes? sometime
     pub frame_min: u32,
     pub frame_max: u32,
 
-    pub offset_min_x: f32,
-    pub offset_min_y: f32,
-    pub offset_min_z: f32,
+    pub ofsMinX: f32,
+    pub ofsMinY: f32,
+    pub ofsMinZ: f32,
 
-    pub offset_max_x: f32,
-    pub offset_max_y: f32,
-    pub offset_max_z: f32,
+    pub ofsMaxX: f32,
+    pub ofsMaxY: f32,
+    pub ofsMaxZ: f32,
 
-    pub offset_type: u32
+    pub ofs_type: u32
 }
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Anmofs {
-
     #[brw(big)]
     pub size: u32,
 
-    // need to implement fixed size string for serde and binrw
-    #[br(count = 0x40)]
-    #[serde(skip)]
-    pub anm_name: Vec<u8>,
-     // 0x40 bytes reserved for it?
-     #[serde(skip)]
-    pub characode: [u8; 0x10], // then characode, 0x10 bytes reserved?
+    #[br(map = |x: Vec<u8>| String::from_utf8_lossy(&x).trim_end_matches('\u{0}').to_string(), count = ANM_STR_LEN)] // Need to trim the null bytes
+    #[bw(map = |x: &String| (x.clone() + String::from('\u{0}').repeat(ANM_STR_LEN - x.len()).as_str()).into_bytes())]
+    pub anm_name: String,
 
-    pub entry_count: u32, // amount of param entries
+    #[br(map = |x: Vec<u8>| String::from_utf8_lossy(&x).trim_end_matches('\u{0}').to_string(), count = CHARACODE_LEN)] // Need to trim the null bytes
+    #[bw(map = |x: &String| (x.clone() + String::from('\u{0}').repeat(CHARACODE_LEN - x.len()).as_str()).into_bytes())]
+    pub characode: String, 
 
-    //pub unk0: u32, // 0x0
+    pub entry_count: u32,
 
-    // count is located before the entries
     #[br(count = entry_count)]
     #[brw(pad_before = 0x4)]
     pub entries: Vec<Entry>
@@ -67,7 +67,7 @@ impl NuccBinaryParsed for Anmofs {
         {   
             serde_json::from_slice(data).unwrap()
         }
-}*/
+}
 
 
 
