@@ -35,8 +35,8 @@ pub struct Entry {
     pub unk2: u32,
     pub unk3: u32,
 
-    pub command_type: u32, // Usually 2 for a playable character's command list
-    pub unk5: u32, // 0
+    pub command_type: u32, 
+    pub support_flag: u32, // (0 = always appear, 1 = only appears if no team, 2 = only appear if team)
     pub unk6: i32,
     pub unk7: i32,
 
