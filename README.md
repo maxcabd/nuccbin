@@ -23,7 +23,7 @@ nuccbin supports a number of in game nuccChunkBinary param / bin formats. All fo
 | [costumeBreakParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/costume_break_param.rs) | ✔️ | ✔️ | `json` |
 | [costumeParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/costume_param.rs) | ✔️ | ✔️ | `json` |
 | [dds](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/dds.rs) | ✔️ | ✔️ |  `dds` |
-| [DictionaryCharacterParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/dictionary_character_param.rs) | ✔️ | ✔️ |  `dds` |
+| [DictionaryCharacterParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/dictionary_character_param.rs) | ✔️ | ✔️ | `json` |
 | [DlcInfoParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/dlc_info_param.rs) | ✔️ | ✔️ | `json` |
 | [effectprm](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/effectprm.rs) | ✔️ | ✔️ | `json` | 
 | [ev](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/ev.rs) | ✔️ | ✔️ | `json` | 
@@ -53,5 +53,5 @@ Special thanks goes to several members including:
 * [PortableProductions](https://www.youtube.com/@PortableProductions) for reversing some formats.
 * [Kuroha Saenoki](https://www.youtube.com/@KurohaSaenoki) for reversing some formats.
 * [Valant96](https://www.youtube.com/@valant96) for information on some formats.
-* [Xact](https://www.youtube.com/@valant96) for reversing some formats.
+* [Xact](https://www.youtube.com/channel/UCluz3KlVGPDYNnJhNvOW_AA) for reversing some formats.
 * and [SutandoTsukai181](https://github.com/SutandoTsukai181) for his initial work on the tool.
