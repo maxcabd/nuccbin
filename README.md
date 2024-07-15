@@ -13,8 +13,10 @@ nuccbin supports a number of in game nuccChunkBinary param / bin formats. All fo
 | --- | --- | --- | --- |
 | [accessoriesParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/accessories_param.rs) | ✔️ | ✔️ | `json` |
 | [accessoryParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/accessory_param.rs) | ✔️ | ✔️ | `json` |
+| [accessoryExceptionParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/accessory_exception_param.rs) | ✔️ | ✔️ | `json` |
 | [animeSongBgmParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/anime_song_bgm_param.rs) | ✔️ | ✔️ | `json` |
 | [anmofs](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/anm_offset.rs) | ✔️ | ✔️ | `json` |
+| [bod1acc](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/bodacc.rs) | ✔️ | ✔️ | `json` |
 | [characode](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/characode.rs) | ✔️ | ✔️  | `json` |
 | [CharaPoseParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/chara_pose_param.rs) | ✔️ | ✔️ | `json` |
 | [characterSelectParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/character_select_param.rs) | ✔️ | ✔️ | `json` |
@@ -23,7 +25,7 @@ nuccbin supports a number of in game nuccChunkBinary param / bin formats. All fo
 | [costumeBreakParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/costume_break_param.rs) | ✔️ | ✔️ | `json` |
 | [costumeParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/costume_param.rs) | ✔️ | ✔️ | `json` |
 | [dds](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/dds.rs) | ✔️ | ✔️ |  `dds` |
-| [DictionaryCharacterParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/dictionary_character_param.rs) | ✔️ | ✔️ | `json` |
+| [DictionaryCharacterParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/dictionary_character_param.rs) | ✔️ | ✔️ |  `dds` |
 | [DlcInfoParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/dlc_info_param.rs) | ✔️ | ✔️ | `json` |
 | [effectprm](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/effectprm.rs) | ✔️ | ✔️ | `json` | 
 | [ev](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/ev.rs) | ✔️ | ✔️ | `json` | 
@@ -40,6 +42,7 @@ nuccbin supports a number of in game nuccChunkBinary param / bin formats. All fo
 | [staffRollTextParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/staff_roll_text_param.rs) | ✔️ | ❌ | `json` | 
 | [supportActionParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/support_action_param.rs) | ✔️ | ✔️ | `json` |
 | [supportSkillRecoverySpeedParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/support_skill_recovery_speed_param.rs) | ✔️ | ✔️ | `json` |
+| [updateInfoParam](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/update_info_param.rs) | ✔️ | ✔️ | `json` |
 | [xml](https://github.com/maxcabd/nuccbin/blob/main/src/nucc_binary/xml.rs) | ✔️ | ✔️ | `xml` | 
 
 
@@ -53,5 +56,5 @@ Special thanks goes to several members including:
 * [PortableProductions](https://www.youtube.com/@PortableProductions) for reversing some formats.
 * [Kuroha Saenoki](https://www.youtube.com/@KurohaSaenoki) for reversing some formats.
 * [Valant96](https://www.youtube.com/@valant96) for information on some formats.
-* [Xact](https://www.youtube.com/channel/UCluz3KlVGPDYNnJhNvOW_AA) for reversing some formats.
+* [Xact](https://www.youtube.com/@valant96) for reversing some formats.
 * and [SutandoTsukai181](https://github.com/SutandoTsukai181) for his initial work on the tool.

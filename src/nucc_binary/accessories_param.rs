@@ -64,10 +64,7 @@ pub struct AccessoriesParam {
     #[serde(skip)]
     pub version: u32,
 
-    pub entry_count: u16,
-
-    #[serde(skip)]
-    pub unk0: u16,
+    pub entry_count: u32,
 
     #[serde(skip)]
     pub entry_ptr: u64,
@@ -104,9 +101,7 @@ impl From<&[u8]> for AccessoriesParam {
         let size = reader.read_be::<u32>().unwrap();
         let version = reader.read_le::<u32>().unwrap();
 
-        let entry_count = reader.read_le::<u16>().unwrap();
-        let unk0 = reader.read_le::<u16>().unwrap();
-
+        let entry_count = reader.read_le::<u32>().unwrap();
         let entry_ptr = reader.read_le::<u64>().unwrap();
 
         let mut entries = Vec::new();
@@ -143,7 +138,6 @@ impl From<&[u8]> for AccessoriesParam {
             size,
             version,
             entry_count,
-            unk0,
             entry_ptr,
             entries
         }
@@ -155,13 +149,13 @@ impl From<AccessoriesParam> for Vec<u8> {
     fn from(mut accessories_param: AccessoriesParam) -> Self {
         let mut writer = Cursor::new(Vec::new());
 
-        accessories_param.entry_count = accessories_param.entries.len() as u16; // Update entry count
+        accessories_param.entry_count = accessories_param.entries.len() as u32; // Update entry count
 
         writer.write_be(&accessories_param.size).unwrap();
         writer.write_le(&1000u32).unwrap(); // Write the version
 
         writer.write_le(&accessories_param.entry_count).unwrap();
-        writer.write_le(&accessories_param.unk0).unwrap();
+       
 
         writer.write_le(&8u64).unwrap(); // Write the ptr to the entries
 

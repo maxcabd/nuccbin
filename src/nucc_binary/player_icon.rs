@@ -8,7 +8,7 @@ const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
 
 // Format was reversed by TheLeonX (https://github.com/TheLeonX)
 #[binrw]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Entry {
     pub characode_index: u32,
     pub duel_player_param_costume_index: i32,

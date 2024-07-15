@@ -51,10 +51,10 @@ pub struct Entry {
     #[serde(skip)]
     pub dictionary_desc_ptr: u64,
 
-    pub justu1: i32,
-    pub jutsu2: i32,
+    pub unk1: i32,
+    pub unk2: i32,
     #[brw(pad_after = 0x94)]
-    pub jutsu3: i32,
+    pub unk3: i32,
     
     #[serde(skip)]
     pub additional_link1_ptr: u64,

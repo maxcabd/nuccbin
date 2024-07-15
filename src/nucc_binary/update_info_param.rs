@@ -2,65 +2,39 @@ use binrw::{binrw, BinReaderExt, BinWriterExt, NullString};
 use binrw::io::{Cursor, Seek, SeekFrom};
 use serde::{Serialize, Deserialize};
 
-
 use super::{NuccBinaryParsed, NuccBinaryType};
 
 const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
 
-// Format was reversed by TheLeonX (https://github.com/TheLeonX)
+
 #[binrw]
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Entry {
-    #[serde(with = "hex::serde")]
-    pub crc32: [u8; 4],
-    pub disable: u32,
-
+    #[brw(pad_after = 0x4)]
+    pub unk1: u32,
+ 
     #[serde(skip)]
-    pub text1_ptr: u64,
+    pub text_ptr: u64,
 
-    #[serde(skip)]
-    pub text2_ptr: u64,
-
-    #[serde(skip)]
-    pub text3_ptr: u64,
-  
+    #[brw(pad_after = 0x4)]
     pub unk2: u32,
 
-    pub unk3: i16,
-    pub acb_file_id: i16,
-    pub acb_cue_id: i16,
-
-    pub unk4: i16,
-
-    pub unk5: u32,
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub text1: String,
-
-    #[brw(ignore)]
-    #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub text2: String,
-
-    #[brw(ignore)]
-    #[bw(map = |x| x.parse::<u8>().unwrap())]
-    pub text3: String,
+    pub text: String
 }
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
-pub struct MessageInfo {
+pub struct UpdateInfoParam {
     #[serde(skip)]
     pub size: u32,
 
     #[serde(skip)]
     pub version: u32,
 
-    pub entry_count: u16,
-
-    
-    #[serde(skip)]
-    pub unk0: u16,
+    pub entry_count: u32,
 
     #[serde(skip)]
     pub entry_ptr: u64,
@@ -69,9 +43,9 @@ pub struct MessageInfo {
     pub entries: Vec<Entry>
 }
 
-impl NuccBinaryParsed for MessageInfo {
+impl NuccBinaryParsed for UpdateInfoParam {
     fn binary_type(&self) -> NuccBinaryType {
-        NuccBinaryType::MessageInfo
+        NuccBinaryType::UpdateInfoParam
     }
 
     fn extension(&self) -> String {
@@ -90,27 +64,23 @@ impl NuccBinaryParsed for MessageInfo {
         }
 }
 
-impl From<&[u8]> for MessageInfo {
+impl From<&[u8]> for UpdateInfoParam {
     fn from(data: &[u8]) -> Self {
         let mut reader = Cursor::new(data);
         
         let size = reader.read_be::<u32>().unwrap();
         let version = reader.read_le::<u32>().unwrap();
 
-        let entry_count = reader.read_le::<u16>().unwrap();
-        let unk0 = reader.read_le::<u16>().unwrap();
-
+        let entry_count = reader.read_le::<u32>().unwrap();
         let entry_ptr = reader.read_le::<u64>().unwrap();
 
         let mut entries = Vec::new();
-        entries.reserve_exact(entry_count as usize); // Make sure we have enough space to avoid reallocations
+        entries.reserve_exact(entry_count as usize); // Make sure we reserve enough space to avoid reallocations
 
         for _ in 0..entry_count as usize {
             let entry = reader.read_le::<Entry>().unwrap();
             entries.push(entry);
         }
-
-
 
         fn read_string_from_ptr(reader: &mut Cursor<&[u8]>, ptr: u64, curent_offset: u64) -> String {
             if ptr != 0 {
@@ -125,39 +95,36 @@ impl From<&[u8]> for MessageInfo {
         for (current_offset, entry) in entries
         .iter_mut()
         .enumerate()
-        .map(|(i, e)| (((0x30 * i + HEADER_SIZE) as u64, e))) 
+        .map(|(i, e)| (((0x18 * i + HEADER_SIZE) as u64, e))) 
         {
-            entry.text1 = read_string_from_ptr(&mut reader, entry.text1_ptr, current_offset + 0x8);
-            entry.text2 = read_string_from_ptr(&mut reader, entry.text2_ptr, current_offset + 0x10);
-            entry.text3 = read_string_from_ptr(&mut reader, entry.text3_ptr, current_offset + 0x18);
+            entry.text = read_string_from_ptr(&mut reader, entry.text_ptr, current_offset + 0x8);
         }
 
         Self {
             size,
             version,
             entry_count,
-            unk0,
             entry_ptr,
             entries
         }
     }
 }
 
-impl From<MessageInfo> for Vec<u8> {
-    fn from(mut message_info: MessageInfo) -> Self {
+impl From<UpdateInfoParam> for Vec<u8> {
+    fn from(mut update_info_param: UpdateInfoParam) -> Self {
+        // Consumes the deserialized version and returns the bytes
         let mut writer = Cursor::new(Vec::new());
 
-        message_info.entry_count = message_info.entries.len() as u16; // Update entry count
+        update_info_param.entry_count = update_info_param.entries.len() as u32; // Update entry count
 
-        writer.write_be(&message_info.size).unwrap();
-        writer.write_le(&1001u32).unwrap(); // Write the version
+        writer.write_be(&update_info_param.size).unwrap();
+        writer.write_le(&1000u32).unwrap(); // Write the version
 
-        writer.write_le(&message_info.entry_count).unwrap();
-        writer.write_le(&message_info.unk0).unwrap();
+        writer.write_le(&update_info_param.entry_count).unwrap();
 
         writer.write_le(&8u64).unwrap(); // Write the ptr to the entries
 
-        writer.write_le(&message_info.entries).unwrap();
+        writer.write_le(&update_info_param.entries).unwrap();
 
         fn write_ptr_to_string(
             writer: &mut Cursor<Vec<u8>>,
@@ -181,22 +148,18 @@ impl From<MessageInfo> for Vec<u8> {
                 
             }
         }
-
-        for (current_offset, entry) in message_info.entries
+        for (current_offset, entry) in update_info_param.entries
             .iter_mut()
             .enumerate()
-            .map(|(i, e)| (((0x30 * i + HEADER_SIZE) as u64, e)))
+            .map(|(i, e)| (((0x18 * i + HEADER_SIZE) as u64, e)))
         {
-            write_ptr_to_string(&mut writer, &entry.text1, current_offset as u64, 0x8);
-            write_ptr_to_string(&mut writer, &entry.text2, current_offset as u64, 0x10);
-            write_ptr_to_string(&mut writer, &entry.text3, current_offset as u64, 0x18);
-            
+            write_ptr_to_string(&mut writer, &entry.text, current_offset as u64, 0x8);
         }
 
         writer.set_position(0);
         writer.write_be::<u32>(&((writer.get_ref().len() - 4) as u32)).unwrap();
         
         writer.into_inner()
-        
-    }
+    }   
 }
+

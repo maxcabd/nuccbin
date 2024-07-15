@@ -8,7 +8,7 @@ use super::{NuccBinaryParsed, NuccBinaryType};
 const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
 
 #[binrw]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]
 pub struct Entry {
     #[serde(skip)]
@@ -37,8 +37,12 @@ pub struct Entry {
     
     pub render_settings: RenderSettings,
 
-    #[serde(skip)]
+    #[serde(skip)]  
     pub dictionary_link_ptr: u64,
+
+    #[brw(pad_after = 4)]
+    pub index: i32, // not sure maybe an index?
+
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
@@ -67,7 +71,7 @@ pub struct Entry {
 
 #[allow(non_snake_case)]
 #[binrw]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RenderSettings {
     pub ofsX1P: f32,
     pub ofsY1P: f32,
@@ -161,10 +165,7 @@ pub struct CharacterSelectParam {
     #[serde(skip)]
     pub version: u32,
 
-    pub entry_count: u16,
-
-    #[serde(skip)]
-    pub unk0: u16,
+    pub entry_count: u32,
 
     #[serde(skip)]
     pub entry_ptr: u64,
@@ -202,8 +203,7 @@ impl From<&[u8]> for CharacterSelectParam {
         let size = reader.read_be::<u32>().unwrap();
         let version = reader.read_le::<u32>().unwrap();
 
-        let entry_count = reader.read_le::<u16>().unwrap();
-        let unk0 = reader.read_le::<u16>().unwrap();
+        let entry_count = reader.read_le::<u32>().unwrap();
 
         let entry_ptr = reader.read_le::<u64>().unwrap();
 
@@ -214,6 +214,7 @@ impl From<&[u8]> for CharacterSelectParam {
             let entry = reader.read_le::<Entry>().unwrap();
             entries.push(entry);
         }
+
 
         fn read_string_from_ptr(reader: &mut Cursor<&[u8]>, ptr: u64, curent_offset: u64) -> String {
             if ptr != 0 {
@@ -228,7 +229,7 @@ impl From<&[u8]> for CharacterSelectParam {
         for (current_offset, entry) in entries
         .iter_mut()
         .enumerate()
-        .map(|(i, e)| (((0x138 * i + HEADER_SIZE) as u64, e))) 
+        .map(|(i, e)| (((0x140 * i + HEADER_SIZE) as u64, e))) 
         {
             entry.searchcode = read_string_from_ptr(&mut reader, entry.searchcode_ptr, current_offset);
             entry.char_name = read_string_from_ptr(&mut reader, entry.char_name_ptr, current_offset + 0x18);
@@ -242,7 +243,6 @@ impl From<&[u8]> for CharacterSelectParam {
             size,
             version,
             entry_count,
-            unk0,
             entry_ptr,
             entries,
         }
@@ -254,13 +254,12 @@ impl From<CharacterSelectParam> for Vec<u8> {
     fn from(mut character_select_param: CharacterSelectParam) -> Self {
         let mut writer = Cursor::new(Vec::new());
 
-        character_select_param.entry_count = character_select_param.entries.len() as u16; // Update entry count
+        character_select_param.entry_count = character_select_param.entries.len() as u32; // Update entry count
 
         writer.write_be(&character_select_param.size).unwrap();
         writer.write_le(&1001u32).unwrap(); // Write the version
 
         writer.write_le(&character_select_param.entry_count).unwrap();
-        writer.write_le(&character_select_param.unk0).unwrap();
 
         writer.write_le(&8u64).unwrap(); // Write the ptr to the entries
 
@@ -291,7 +290,7 @@ impl From<CharacterSelectParam> for Vec<u8> {
         for (current_offset, entry) in character_select_param.entries
             .iter_mut()
             .enumerate()
-            .map(|(i, e)| (((0x138 * i + HEADER_SIZE) as u64, e)))
+            .map(|(i, e)| (((0x140 * i + HEADER_SIZE) as u64, e)))
         {
             write_ptr_to_string(&mut writer, &entry.searchcode, current_offset, 0x0);
             write_ptr_to_string(&mut writer, &entry.char_name, current_offset, 0x18);

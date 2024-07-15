@@ -8,7 +8,7 @@ use super::{NuccBinaryParsed, NuccBinaryType};
 const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
 
 #[binrw]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Entry {
     pub player_setting_id: u32,
     pub characode_index: u32,
@@ -47,7 +47,7 @@ pub struct Entry {
 }
 
 #[binrw]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PlayerSettingParam {
     #[serde(skip)]
     pub size: u32,

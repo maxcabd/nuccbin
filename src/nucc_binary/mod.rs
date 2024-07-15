@@ -3,6 +3,7 @@ mod accessory_exception_param;
 mod accessory_param;
 mod anime_song_bgm_param;
 mod anm_offset;
+mod bodacc;
 mod characode;
 mod chara_pose_param;
 mod character_select_param;
@@ -17,12 +18,13 @@ mod effectprm;
 mod ev;
 mod final_sp_skill_cutin;
 mod lua;
-mod message_info;
+pub mod message_info;
 mod ougi_finish_param;
 mod player_double_effect_param; 
 mod player_setting_param;
 mod player_icon;
 mod png;
+mod prm_bas;
 mod prm_load;
 mod prohibited_substring_param;
 mod skill_index_setting_param;
@@ -30,13 +32,14 @@ mod snd;
 mod staff_roll_text_param;
 mod support_action_param;
 mod support_skill_recovery_speed_param;
+mod update_info_param;
 mod xml;
 
 use binrw::{BinReaderExt, BinWriterExt};
 use binrw::io::Cursor;
 use downcast_rs::{impl_downcast, Downcast};
 
-use nuccbin::NuccBinaryType;
+use super::NuccBinaryType;
 
 //--------------------//
 pub use accessories_param::AccessoriesParam;
@@ -44,6 +47,7 @@ pub use accessory_exception_param::AccessoryExceptionParam;
 pub use accessory_param::AccessoryParam;
 pub use anime_song_bgm_param::AnimeSongBgmParam;
 pub use anm_offset::Anmofs;
+pub use bodacc::BodAcc;
 pub use characode::Characode;
 pub use chara_pose_param::CharaPoseParam;
 pub use character_select_param::CharacterSelectParam;
@@ -64,6 +68,7 @@ pub use player_double_effect_param::PlayerDoubleEffectParam;
 pub use player_setting_param::PlayerSettingParam;
 pub use player_icon::PlayerIcon;
 pub use png::Png;
+pub use prm_bas::PrmBas;
 pub use prm_load::PrmLoad;
 pub use prohibited_substring_param::ProhibitedSubstringParam;
 pub use skill_index_setting_param::SkillIndexSettingParam;
@@ -71,10 +76,12 @@ pub use snd::Snd;
 pub use staff_roll_text_param::StaffRollTextParam;
 pub use support_action_param::SupportActionParam;
 pub use support_skill_recovery_speed_param::SupportSkillRecoverySpeedParam;
+pub use update_info_param::UpdateInfoParam;
 pub use xml::Xml;
 
 
 //--------------------//
+
 pub trait NuccBinaryParsed: Downcast {
     fn binary_type(&self) -> NuccBinaryType;
     fn extension(&self) -> String;
@@ -85,6 +92,7 @@ pub trait NuccBinaryParsed: Downcast {
 }
 
 impl_downcast!(NuccBinaryParsed);
+
 
 pub struct NuccBinaryParsedReader<'a> (pub NuccBinaryType, pub &'a [u8]);
 
@@ -101,6 +109,8 @@ impl From<NuccBinaryParsedReader<'_>> for Box<dyn NuccBinaryParsed> {
                 let mut anm_offset = Cursor::new(data);
                 Box::new(anm_offset.read_le::<Anmofs>().unwrap())
             }
+
+            NuccBinaryType::BodAcc => Box::new(BodAcc::from(&data[..])),
             
             NuccBinaryType::Characode => {
                 let mut characode = Cursor::new(data);
@@ -142,6 +152,11 @@ impl From<NuccBinaryParsedReader<'_>> for Box<dyn NuccBinaryParsed> {
             NuccBinaryType::PlayerIcon => Box::new(PlayerIcon::from(&data[..])),
             NuccBinaryType::Png => Box::new(Png::from(&data[..])),
 
+            NuccBinaryType::PrmBas => {
+                let mut prm_bas = Cursor::new(data);
+                Box::new(prm_bas.read_le::<PrmBas>().unwrap())
+            }
+
             NuccBinaryType::PrmLoad => {
                 let mut prm_load = Cursor::new(data);
                 Box::new(prm_load.read_le::<PrmLoad>().unwrap())
@@ -171,6 +186,8 @@ impl From<NuccBinaryParsedReader<'_>> for Box<dyn NuccBinaryParsed> {
                 Box::new(support_skill_recovery_speed_param.read_le::<SupportSkillRecoverySpeedParam>().unwrap())
             }
 
+            NuccBinaryType::UpdateInfoParam => Box::new(UpdateInfoParam::from(&data[..])),
+
             NuccBinaryType::Xml => Box::new(Xml::from(&data[..])),
         }
     }
@@ -196,6 +213,8 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
                 anm_offset.write_be::<u32>(&((anm_offset.get_ref().len() - 4) as u32)).unwrap();
                 anm_offset.into_inner()
             },
+
+            NuccBinaryType::BodAcc => { (*boxed.downcast::<BodAcc>().ok().unwrap()).into() },
             NuccBinaryType::Characode => {
                 let mut characode = Cursor::new(Vec::new());
                 characode.write_le(&*boxed.downcast::<Characode>().ok().unwrap()).unwrap();
@@ -248,6 +267,16 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
             NuccBinaryType::PlayerSettingParam => { (*boxed.downcast::<PlayerSettingParam>().ok().unwrap()).into() },
             NuccBinaryType::PlayerIcon => { (*boxed.downcast::<PlayerIcon>().ok().unwrap()).into() },
             NuccBinaryType::Png => { (*boxed.downcast::<Png>().ok().unwrap()).into() },
+
+            NuccBinaryType::PrmBas => {
+                let mut prm_bas = Cursor::new(Vec::new());
+                prm_bas.write_le(&*boxed.downcast::<PrmBas>().ok().unwrap()).unwrap();
+                
+                prm_bas.set_position(0);
+                prm_bas.write_be::<u32>(&((prm_bas.get_ref().len() - 4) as u32)).unwrap();
+                prm_bas.into_inner()
+            },
+
             NuccBinaryType::PrmLoad => {
                 let mut prm_load = Cursor::new(Vec::new());
                 prm_load.write_le(&*boxed.downcast::<PrmLoad>().ok().unwrap()).unwrap();
@@ -295,6 +324,8 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
                 support_skill_recovery_speed_param.into_inner()
             },
 
+            NuccBinaryType::UpdateInfoParam => { (*boxed.downcast::<UpdateInfoParam>().ok().unwrap()).into() },
+
             NuccBinaryType::Xml => { (*boxed.downcast::<Xml>().ok().unwrap()).into() }
         }
     }
@@ -322,6 +353,7 @@ impl From<NuccBinaryParsedDeserializer> for Box<dyn NuccBinaryParsed> {
             NuccBinaryType::AccessoryParam => Box::new(AccessoryParam::deserialize(&data)),
             NuccBinaryType::AnimeSongBgmParam => Box::new(AnimeSongBgmParam::deserialize(&data)),
             NuccBinaryType::Anmofs => Box::new(Anmofs::deserialize(&data)),
+            NuccBinaryType::BodAcc => Box::new(BodAcc::deserialize(&data)),
             NuccBinaryType::Characode => Box::new(Characode::deserialize(&data)),
             NuccBinaryType::CharaPoseParam => Box::new(CharaPoseParam::deserialize(&data)),
             NuccBinaryType::CharacterSelectParam => Box::new(CharacterSelectParam::deserialize(&data)),
@@ -342,6 +374,7 @@ impl From<NuccBinaryParsedDeserializer> for Box<dyn NuccBinaryParsed> {
             NuccBinaryType::PlayerSettingParam => Box::new(PlayerSettingParam::deserialize(&data)),
             NuccBinaryType::PlayerIcon => Box::new(PlayerIcon::deserialize(&data)),
             NuccBinaryType::Png => Box::new(Png::deserialize(&data)),
+            NuccBinaryType::PrmBas => Box::new(PrmBas::deserialize(&data)),
             NuccBinaryType::PrmLoad => Box::new(PrmLoad::deserialize(&data)),
             NuccBinaryType::ProhibitedSubstringParam => Box::new(ProhibitedSubstringParam::deserialize(&data)),
             NuccBinaryType::SkillIndexSettingParam => Box::new(SkillIndexSettingParam::deserialize(&data)),
@@ -349,6 +382,7 @@ impl From<NuccBinaryParsedDeserializer> for Box<dyn NuccBinaryParsed> {
             NuccBinaryType::StaffRollTextParam => Box::new(StaffRollTextParam::deserialize(&data)),
             NuccBinaryType::SupportActionParam => Box::new(SupportActionParam::deserialize(&data)),
             NuccBinaryType::SupportSkillRecoverySpeedParam => Box::new(SupportSkillRecoverySpeedParam::deserialize(&data)),
+            NuccBinaryType::UpdateInfoParam => Box::new(UpdateInfoParam::deserialize(&data)),
             NuccBinaryType::Xml => Box::new(Xml::deserialize(&data))
         }
     }

@@ -8,7 +8,7 @@ use super::{NuccBinaryParsed, NuccBinaryType};
 const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
 
 #[binrw]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Entry {
     #[serde(skip)]
     pub costume_link_ptr: u64,
@@ -33,7 +33,6 @@ pub struct Entry {
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
     pub costume_name: String,
-
 
 }
 

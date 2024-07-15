@@ -17,14 +17,16 @@ pub struct Entry {
     #[serde(skip)]
     pub ougi_fin_link_ptr: u64,
 
+    #[serde(skip)]
+    pub unk_ptr: u64,
+
+    #[serde(skip)]
+    pub spl_fin_ptr: u32,
     pub index: u32,
-    pub spl_fin_index: u32,
 
     #[serde(skip)]
-    pub spl_fin_ptr: u64,
-
-    #[serde(skip)]
-    pub spl_fin_path_ptr: u64,
+    pub spl_fin_path_ptr: u32,
+    pub unk4: u32,
 
     #[serde(skip)]
     pub spl_fin_small_ptr: u64,
@@ -33,13 +35,17 @@ pub struct Entry {
     pub spl_fin_big_ptr: u64,
 
     pub price: u32,
-    pub beginning_id: u32,
+    pub unlock_condition: u32,
 
     #[serde(skip)]
-    pub search_code_ptr: u64,
+    pub search_code_ptr: u32,
+
+    pub unk1: u32,
 
     #[serde(skip)]
-    pub section_id_ptr: u64,
+    pub section_id_ptr: u32,
+
+    pub unk2: u32,
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
@@ -48,6 +54,10 @@ pub struct Entry {
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
     pub ougi_fin_link: String,
+
+    #[brw(ignore)]
+    #[bw(map = |x| x.parse::<u8>().unwrap())]
+    pub unk: String,
 
     #[brw(ignore)]
     #[bw(map = |x| x.parse::<u8>().unwrap())]
@@ -132,7 +142,10 @@ impl From<&[u8]> for OugiFinishParam {
         }
 
         fn read_string_from_ptr(reader: &mut Cursor<&[u8]>, ptr: u64, curent_offset: u64) -> String {
-            if ptr != 0 {
+            // If the pointer is not 0 or -1, read the string from the pointer
+
+  
+            if ptr != 0 && ptr < 100 && ptr != 0xffffffff as u64 {
                 reader.seek(SeekFrom::Start(curent_offset as u64)).unwrap();
                 reader.seek(SeekFrom::Current(ptr as i64)).unwrap();
                 reader.read_be::<NullString>().unwrap().to_string()
@@ -148,12 +161,13 @@ impl From<&[u8]> for OugiFinishParam {
         {
             entry.char_name = read_string_from_ptr(&mut reader, entry.char_name_ptr, current_offset as u64);
             entry.ougi_fin_link = read_string_from_ptr(&mut reader, entry.ougi_fin_link_ptr, current_offset + 0x8);
-            entry.spl_fin = read_string_from_ptr(&mut reader, entry.spl_fin_ptr, current_offset + 0x18);
-            entry.spl_fin_path = read_string_from_ptr(&mut reader, entry.spl_fin_path_ptr, current_offset + 0x20);
+            entry.unk = read_string_from_ptr(&mut reader, entry.unk_ptr, current_offset + 0x10);
+            entry.spl_fin = read_string_from_ptr(&mut reader, entry.spl_fin_ptr as u64, current_offset + 0x18);
+            entry.spl_fin_path = read_string_from_ptr(&mut reader, entry.spl_fin_path_ptr as u64, current_offset + 0x20);
             entry.spl_fin_small = read_string_from_ptr(&mut reader, entry.spl_fin_small_ptr, current_offset + 0x28);
             entry.spl_fin_big = read_string_from_ptr(&mut reader, entry.spl_fin_big_ptr, current_offset + 0x30);
-            entry.search_code = read_string_from_ptr(&mut reader, entry.search_code_ptr, current_offset + 0x40);
-            entry.section_id = read_string_from_ptr(&mut reader, entry.section_id_ptr, current_offset + 0x48);
+            entry.search_code = read_string_from_ptr(&mut reader, entry.search_code_ptr as u64, current_offset + 0x40);
+            entry.section_id = read_string_from_ptr(&mut reader, entry.section_id_ptr as u64, current_offset + 0x48);
         }
 
         Self {

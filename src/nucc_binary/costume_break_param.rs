@@ -9,7 +9,7 @@ const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
 
 
 #[binrw]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Entry {
     pub characode_index: u32,
     pub costume_index: u32,

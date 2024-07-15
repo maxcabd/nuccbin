@@ -1,14 +1,17 @@
 use strum_macros::{EnumString, EnumIter, Display};
 use regex::Regex;
 
+pub mod args;
+pub mod nucc_binary;
 
-#[derive(Debug, Copy, Clone, EnumString, EnumIter, Display, PartialEq)]
+#[derive(Debug, Copy, Clone, EnumString, EnumIter, Display, PartialEq, Hash, Eq)]
 pub enum NuccBinaryType {
     AccessoriesParam,
     AccessoryExceptionParam,
     AccessoryParam,
     AnimeSongBgmParam,
     Anmofs,
+    BodAcc,
     #[strum(ascii_case_insensitive)]
     Characode,
     CharaPoseParam,
@@ -30,6 +33,7 @@ pub enum NuccBinaryType {
     PlayerSettingParam,
     PlayerIcon,
     Png,
+    PrmBas,
     PrmLoad,
     ProhibitedSubstringParam,
     SkillIndexSettingParam,
@@ -37,6 +41,7 @@ pub enum NuccBinaryType {
     StaffRollTextParam,
     SupportActionParam,
     SupportSkillRecoverySpeedParam,
+    UpdateInfoParam,
     Xml,
 }
 
@@ -49,6 +54,7 @@ impl NuccBinaryType {
             NuccBinaryType::AccessoryParam => { Regex::new(r"(accessoryParam\.bin)$").unwrap() },
             NuccBinaryType::AnimeSongBgmParam => { Regex::new(r"(animeSongBgmParam\.bin)$").unwrap() },
             NuccBinaryType::Anmofs => { Regex::new(r"(anm_offset)").unwrap() },
+            NuccBinaryType::BodAcc => { Regex::new(r"(bod1acc\.bin)$").unwrap() },
             NuccBinaryType::Characode => { Regex::new(r"(characode\.bin)$").unwrap() },
             NuccBinaryType::CharaPoseParam => { Regex::new(r"(CharaPoseParam\.bin)$").unwrap() },
             NuccBinaryType::CharacterSelectParam => { Regex::new(r"(characterSelectParam\.bin)$").unwrap() },
@@ -69,6 +75,7 @@ impl NuccBinaryType {
             NuccBinaryType::PlayerSettingParam => { Regex::new(r"(playerSettingParam\.bin)$").unwrap() },
             NuccBinaryType::PlayerIcon => { Regex::new(r"(player_icon\.bin)$").unwrap() },
             NuccBinaryType::Png => { Regex::new(r"(\.png)$").unwrap() },
+            NuccBinaryType::PrmBas => { Regex::new(r"(prm_bas)").unwrap() },
             NuccBinaryType::PrmLoad => { Regex::new(r"(prm_load\.bin)$").unwrap() },
             NuccBinaryType::ProhibitedSubstringParam => { Regex::new(r"(prohibitedSubstringParam\.bin)$").unwrap() },
             NuccBinaryType::SkillIndexSettingParam => { Regex::new(r"(skillIndexSettingParam\.bin)$").unwrap() },
@@ -76,6 +83,7 @@ impl NuccBinaryType {
             NuccBinaryType::StaffRollTextParam => { Regex::new(r"(staffRollTextParam\.bin)$").unwrap() },
             NuccBinaryType::SupportActionParam => { Regex::new(r"(supportActionParam\.bin)$").unwrap() },
             NuccBinaryType::SupportSkillRecoverySpeedParam => { Regex::new(r"(supportSkillRecoverySpeedParam\.bin)$").unwrap() },
+            NuccBinaryType::UpdateInfoParam => { Regex::new(r"(updateInfoParam\.bin)$").unwrap() }
             NuccBinaryType::Xml => { Regex::new(r"(\.xml)$").unwrap() }
         }
     }
