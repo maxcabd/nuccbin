@@ -5,7 +5,7 @@ use serde::{Serialize, Deserialize};
 
 use super::{NuccBinaryParsed, NuccBinaryType};
 
-const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
+use super::HEADER_SIZE;
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -160,9 +160,6 @@ pub struct RenderSettings {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CharacterSelectParam {
     #[serde(skip)]
-    pub size: u32,
-
-    #[serde(skip)]
     pub version: u32,
 
     pub entry_count: u32,
@@ -200,7 +197,6 @@ impl From<&[u8]> for CharacterSelectParam {
     fn from(data: &[u8]) -> Self {
         let mut reader = Cursor::new(data);
         
-        let size = reader.read_be::<u32>().unwrap();
         let version = reader.read_le::<u32>().unwrap();
 
         let entry_count = reader.read_le::<u32>().unwrap();
@@ -240,7 +236,6 @@ impl From<&[u8]> for CharacterSelectParam {
         }
 
         Self {
-            size,
             version,
             entry_count,
             entry_ptr,
@@ -256,7 +251,6 @@ impl From<CharacterSelectParam> for Vec<u8> {
 
         character_select_param.entry_count = character_select_param.entries.len() as u32; // Update entry count
 
-        writer.write_be(&character_select_param.size).unwrap();
         writer.write_le(&1001u32).unwrap(); // Write the version
 
         writer.write_le(&character_select_param.entry_count).unwrap();
@@ -300,9 +294,7 @@ impl From<CharacterSelectParam> for Vec<u8> {
             write_ptr_to_string(&mut writer, &entry.dictionary_link, current_offset, 0x130);
         }
 
-        // Go to the start of buffer and write the size
-        writer.set_position(0);
-        writer.write_be::<u32>(&((writer.get_ref().len() - 4) as u32)).unwrap();
+  
 
         writer.into_inner()
     }

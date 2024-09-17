@@ -5,7 +5,7 @@ use serde::{Serialize, Deserialize};
 use super::{NuccBinaryParsed, NuccBinaryType};
 
 
-const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
+use super::HEADER_SIZE;
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
@@ -32,15 +32,9 @@ pub struct Entry {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CharaPoseParam {
     #[serde(skip)]
-    pub size: u32,
-
-    #[serde(skip)]
     pub version: u32,
 
-    pub entry_count: u16,
-
-    #[serde(skip)]
-    pub unk0: u16,
+    pub entry_count: u32,
 
     #[serde(skip)]
     pub entry_ptr: u64,
@@ -75,12 +69,9 @@ impl From<&[u8]> for CharaPoseParam {
     fn from(data: &[u8]) -> Self {
         let mut reader = Cursor::new(data);
         
-        let size = reader.read_be::<u32>().unwrap();
         let version = reader.read_le::<u32>().unwrap();
 
-        let entry_count = reader.read_le::<u16>().unwrap();
-        let unk0 = reader.read_le::<u16>().unwrap();
-
+        let entry_count = reader.read_le::<u32>().unwrap();
         let entry_ptr = reader.read_le::<u64>().unwrap();
 
         let mut entries = Vec::new();
@@ -110,10 +101,8 @@ impl From<&[u8]> for CharaPoseParam {
         }
 
         Self {
-            size,
             version,
             entry_count,
-            unk0,
             entry_ptr,
             entries
         }
@@ -125,13 +114,10 @@ impl From<CharaPoseParam> for Vec<u8> {
         // Consumes the deserialized version and returns the bytes
         let mut writer = Cursor::new(Vec::new());
 
-        chara_pose_param.entry_count = chara_pose_param.entries.len() as u16; // Update entry count
+        chara_pose_param.entry_count = chara_pose_param.entries.len() as u32; // Update entry count
 
-        writer.write_be(&chara_pose_param.size).unwrap();
         writer.write_le(&1000u32).unwrap(); // Write the version
-
         writer.write_le(&chara_pose_param.entry_count).unwrap();
-        writer.write_le(&chara_pose_param.unk0).unwrap();
 
         writer.write_le(&8u64).unwrap(); // Write the ptr to the entries
 
@@ -172,8 +158,6 @@ impl From<CharaPoseParam> for Vec<u8> {
             entry.index = i as u32;
         }
 
-        writer.set_position(0);
-        writer.write_be::<u32>(&((writer.get_ref().len() - 4) as u32)).unwrap();
         
         writer.into_inner()
     }

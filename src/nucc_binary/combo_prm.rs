@@ -19,9 +19,6 @@ pub struct Entry {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ComboPrm {
     #[serde(skip)]
-    pub size: u32,
-
-    #[serde(skip)]
     #[bw(calc = 1001)]
     pub version: u32,
 

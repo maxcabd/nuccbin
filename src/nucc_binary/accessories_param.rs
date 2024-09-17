@@ -4,8 +4,7 @@ use serde::{Serialize, Deserialize};
 
 
 use super::{NuccBinaryParsed, NuccBinaryType};
-
-const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
+use super::HEADER_SIZE;
 
 // Format reversed by Kuroha Saenoki (https://www.youtube.com/@KurohaSaenoki)
 #[allow(non_snake_case)]
@@ -59,9 +58,6 @@ pub struct Entry {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AccessoriesParam {
     #[serde(skip)]
-    pub size: u32,
-
-    #[serde(skip)]
     pub version: u32,
 
     pub entry_count: u32,
@@ -97,8 +93,7 @@ impl NuccBinaryParsed for AccessoriesParam {
 impl From<&[u8]> for AccessoriesParam {
     fn from(data: &[u8]) -> Self {
         let mut reader = Cursor::new(data);
-        
-        let size = reader.read_be::<u32>().unwrap();
+
         let version = reader.read_le::<u32>().unwrap();
 
         let entry_count = reader.read_le::<u32>().unwrap();
@@ -135,7 +130,6 @@ impl From<&[u8]> for AccessoriesParam {
         }
 
         Self {
-            size,
             version,
             entry_count,
             entry_ptr,
@@ -151,7 +145,6 @@ impl From<AccessoriesParam> for Vec<u8> {
 
         accessories_param.entry_count = accessories_param.entries.len() as u32; // Update entry count
 
-        writer.write_be(&accessories_param.size).unwrap();
         writer.write_le(&1000u32).unwrap(); // Write the version
 
         writer.write_le(&accessories_param.entry_count).unwrap();
@@ -200,9 +193,6 @@ impl From<AccessoriesParam> for Vec<u8> {
             entry.index = i as u32;
         }
 
-        // Go to the start of buffer and write the size
-        writer.set_position(0);
-        writer.write_be::<u32>(&((writer.get_ref().len() - 4) as u32)).unwrap();
 
         writer.into_inner()
     }

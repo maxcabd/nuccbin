@@ -24,7 +24,7 @@ pub struct Entry {
     pub unk4: f32,
     pub timing: f32,
 
-    pub unk5: i16,
+    pub index: i16,
     pub unk6: i16,
     pub unk7: i16,
 
@@ -35,9 +35,6 @@ pub struct Entry {
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Snd {
-    #[serde(skip)]
-    pub size: u32,
-
     #[bw(calc = self.entries.len() as u16)]
     pub entry_count: u16,
 

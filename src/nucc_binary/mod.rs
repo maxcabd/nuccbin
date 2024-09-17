@@ -16,6 +16,7 @@ mod dictionary_character_param;
 mod dlc_info_param;
 mod effectprm;
 mod ev;
+mod ev_spl;
 mod final_sp_skill_cutin;
 mod lua;
 pub mod message_info;
@@ -41,6 +42,8 @@ use downcast_rs::{impl_downcast, Downcast};
 
 use super::NuccBinaryType;
 
+pub const HEADER_SIZE: usize = 0x10; // Size of NUCC Binary headers
+
 //--------------------//
 pub use accessories_param::AccessoriesParam;
 pub use accessory_exception_param::AccessoryExceptionParam;
@@ -59,6 +62,7 @@ pub use dds::Dds;
 pub use dictionary_character_param::DictionaryCharacterParam;
 pub use dlc_info_param::DlcInfoParam;
 pub use ev::Ev;
+pub use ev_spl::EvSpl;
 pub use final_sp_skill_cutin::FinalSpSkillCutIn;
 pub use effectprm::EffectPrm;
 pub use lua::Lua;
@@ -142,6 +146,11 @@ impl From<NuccBinaryParsedReader<'_>> for Box<dyn NuccBinaryParsed> {
                 Box::new(ev.read_le::<Ev>().unwrap())
             }
 
+            NuccBinaryType::EvSpl => {
+                let mut ev_spl = Cursor::new(data);
+                Box::new(ev_spl.read_le::<EvSpl>().unwrap())
+            }
+
             NuccBinaryType::FinalSpSkillCutIn => Box::new(FinalSpSkillCutIn::from(&data[..])),
 
             NuccBinaryType::Lua => Box::new(Lua::from(&data[..])),
@@ -208,9 +217,6 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
             NuccBinaryType::Anmofs => {
                 let mut anm_offset = Cursor::new(Vec::new());
                 anm_offset.write_le(&*boxed.downcast::<Anmofs>().ok().unwrap()).unwrap();
-                
-                anm_offset.set_position(0);
-                anm_offset.write_be::<u32>(&((anm_offset.get_ref().len() - 4) as u32)).unwrap();
                 anm_offset.into_inner()
             },
 
@@ -218,9 +224,6 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
             NuccBinaryType::Characode => {
                 let mut characode = Cursor::new(Vec::new());
                 characode.write_le(&*boxed.downcast::<Characode>().ok().unwrap()).unwrap();
-                
-                characode.set_position(0);
-                characode.write_be::<u32>(&((characode.get_ref().len() - 4) as u32)).unwrap();
                 characode.into_inner()
             },
 
@@ -229,9 +232,6 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
             NuccBinaryType::ComboPrm => {
                 let mut combo_prm = Cursor::new(Vec::new());
                 combo_prm.write_le(&*boxed.downcast::<ComboPrm>().ok().unwrap()).unwrap();
-                
-                combo_prm.set_position(0);
-                combo_prm.write_be::<u32>(&((combo_prm.get_ref().len() - 4) as u32)).unwrap();
                 combo_prm.into_inner()
             },
 
@@ -244,19 +244,19 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
             NuccBinaryType::EffectPrm => {
                 let mut effect_prm = Cursor::new(Vec::new());
                 effect_prm.write_le(&*boxed.downcast::<EffectPrm>().ok().unwrap()).unwrap();
-                
-                effect_prm.set_position(0);
-                effect_prm.write_be::<u32>(&((effect_prm.get_ref().len() - 4) as u32)).unwrap();
                 effect_prm.into_inner()
             },
 
             NuccBinaryType::Ev => {
                 let mut ev = Cursor::new(Vec::new());
                 ev.write_le(&*boxed.downcast::<Ev>().ok().unwrap()).unwrap();
-                
-                ev.set_position(0);
-                ev.write_be::<u32>(&((ev.get_ref().len() - 4) as u32)).unwrap();
                 ev.into_inner()
+            },
+
+            NuccBinaryType::EvSpl => {
+                let mut ev_spl = Cursor::new(Vec::new());
+                ev_spl.write_le(&*boxed.downcast::<EvSpl>().ok().unwrap()).unwrap();
+                ev_spl.into_inner()
             },
 
             NuccBinaryType::FinalSpSkillCutIn => { (*boxed.downcast::<FinalSpSkillCutIn>().ok().unwrap()).into() },
@@ -271,37 +271,26 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
             NuccBinaryType::PrmBas => {
                 let mut prm_bas = Cursor::new(Vec::new());
                 prm_bas.write_le(&*boxed.downcast::<PrmBas>().ok().unwrap()).unwrap();
-                
-                prm_bas.set_position(0);
-                prm_bas.write_be::<u32>(&((prm_bas.get_ref().len() - 4) as u32)).unwrap();
                 prm_bas.into_inner()
             },
 
             NuccBinaryType::PrmLoad => {
                 let mut prm_load = Cursor::new(Vec::new());
                 prm_load.write_le(&*boxed.downcast::<PrmLoad>().ok().unwrap()).unwrap();
-                
-                prm_load.set_position(0);
-                prm_load.write_be::<u32>(&((prm_load.get_ref().len() - 4) as u32)).unwrap();
                 prm_load.into_inner()
             },
 
             NuccBinaryType::ProhibitedSubstringParam => { (*boxed.downcast::<ProhibitedSubstringParam>().ok().unwrap()).into() },
+
             NuccBinaryType::SkillIndexSettingParam => {
                 let mut skill_index_setting_param = Cursor::new(Vec::new());
                 skill_index_setting_param.write_le(&*boxed.downcast::<SkillIndexSettingParam>().ok().unwrap()).unwrap();
-                
-                skill_index_setting_param.set_position(0);
-                skill_index_setting_param.write_be::<u32>(&((skill_index_setting_param.get_ref().len() - 4) as u32)).unwrap();
                 skill_index_setting_param.into_inner()
             },
 
             NuccBinaryType::Snd => {
                 let mut snd = Cursor::new(Vec::new());
                 snd.write_le(&*boxed.downcast::<Snd>().ok().unwrap()).unwrap();
-                
-                snd.set_position(0);
-                snd.write_be::<u32>(&((snd.get_ref().len() - 4) as u32)).unwrap();
                 snd.into_inner()
             },
 
@@ -309,23 +298,16 @@ impl From<NuccBinaryParsedWriter> for Vec<u8> {
             NuccBinaryType::SupportActionParam => {
                 let mut support_action_param = Cursor::new(Vec::new());
                 support_action_param.write_le(&*boxed.downcast::<SupportActionParam>().ok().unwrap()).unwrap();
-                
-                support_action_param.set_position(0);
-                support_action_param.write_be::<u32>(&((support_action_param.get_ref().len() - 4) as u32)).unwrap();
                 support_action_param.into_inner()
             },
 
             NuccBinaryType::SupportSkillRecoverySpeedParam => {
                 let mut support_skill_recovery_speed_param = Cursor::new(Vec::new());
                 support_skill_recovery_speed_param.write_le(&*boxed.downcast::<SupportSkillRecoverySpeedParam>().ok().unwrap()).unwrap();
-                
-                support_skill_recovery_speed_param.set_position(0);
-                support_skill_recovery_speed_param.write_be::<u32>(&((support_skill_recovery_speed_param.get_ref().len() - 4) as u32)).unwrap();
                 support_skill_recovery_speed_param.into_inner()
             },
 
             NuccBinaryType::UpdateInfoParam => { (*boxed.downcast::<UpdateInfoParam>().ok().unwrap()).into() },
-
             NuccBinaryType::Xml => { (*boxed.downcast::<Xml>().ok().unwrap()).into() }
         }
     }
@@ -366,6 +348,7 @@ impl From<NuccBinaryParsedDeserializer> for Box<dyn NuccBinaryParsed> {
             NuccBinaryType::DlcInfoParam => Box::new(DlcInfoParam::deserialize(&data)),
             NuccBinaryType::EffectPrm => Box::new(EffectPrm::deserialize(&data)),
             NuccBinaryType::Ev => Box::new(Ev::deserialize(&data)),
+            NuccBinaryType::EvSpl => Box::new(EvSpl::deserialize(&data)),
             NuccBinaryType::FinalSpSkillCutIn => Box::new(FinalSpSkillCutIn::deserialize(&data)),
             NuccBinaryType::Lua => Box::new(Lua::deserialize(&data)),
             NuccBinaryType::MessageInfo => Box::new(MessageInfo::deserialize(&data)),

@@ -1,7 +1,6 @@
 use binrw::binrw;
 use serde::{Serialize, Deserialize};
 
-
 use super::{NuccBinaryParsed, NuccBinaryType};
 
 const STR_LEN: usize = 0x20;
@@ -10,36 +9,58 @@ const STR_LEN: usize = 0x20;
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Entry {
-    pub unk1: i32,
-
     #[br(map = |x: Vec<u8>| String::from_utf8_lossy(&x).trim_end_matches('\u{0}').to_string(), count = STR_LEN)] // Need to trim the null bytes
     #[bw(map = |x: &String| (x.clone() + String::from('\u{0}').repeat(STR_LEN - x.len()).as_str()).into_bytes())]
-    pub folder: String,
+    pub sound_name: String,
 
-    #[br(map = |x: Vec<u8>| String::from_utf8_lossy(&x).trim_end_matches('\u{0}').to_string(), count = STR_LEN)] // Need to trim the null bytes
+    pub unk0: i16,
+    pub volume: f32,
+
+    #[brw(pad_after = 0x4)]
+    pub pitch: i16,
+
+    pub timing: i16,
+
+    pub unk4: f32,
+
+    pub unk5: f32,
+
+    #[br(map = |x: Vec<u8>| String::from_utf8_lossy(&x).trim_end_matches('\u{0}').to_string(), count = STR_LEN)]
     #[bw(map = |x: &String| (x.clone() + String::from('\u{0}').repeat(STR_LEN - x.len()).as_str()).into_bytes())]
-    pub code: String,
+    pub anm_name: String,
 
-    pub file_type: i32,
-    pub unk2: i32,
-    pub load_condition: i32,
 
+    #[br(map = |x: Vec<u8>| String::from_utf8_lossy(&x).trim_end_matches('\u{0}').to_string(), count = STR_LEN)]
+    #[bw(map = |x: &String| (x.clone() + String::from('\u{0}').repeat(STR_LEN - x.len()).as_str()).into_bytes())]
+    pub bone: String,
+
+
+    #[brw(pad_after = 0x4)]
+    pub unk6: i32, 
+    pub unk8: i32,
+
+    pub unk9: i32,
+
+    pub unk10: i32,
+
+    #[br(map = |x: Vec<u8>| String::from_utf8_lossy(&x).trim_end_matches('\u{0}').to_string(), count = STR_LEN)]
+    #[bw(map = |x: &String| (x.clone() + String::from('\u{0}').repeat(STR_LEN - x.len()).as_str()).into_bytes())]
+    pub pl_anm: String
 }
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
-pub struct PrmLoad {
-    #[bw(calc = entries.len() as u32)]
-    pub entry_count: u32,
+pub struct EvSpl {
+    #[bw(calc = self.entries.len() as u16)]
+    pub entry_count: u16,
 
     #[br(count = entry_count)]
     pub entries: Vec<Entry>
 }
 
-
-impl NuccBinaryParsed for PrmLoad {
+impl NuccBinaryParsed for EvSpl {
     fn binary_type(&self) -> NuccBinaryType {
-        NuccBinaryType::PrmLoad
+        NuccBinaryType::EvSpl
     }
 
     fn extension(&self) -> String {

@@ -5,7 +5,7 @@ use serde::{Serialize, Deserialize};
 
 use super::{NuccBinaryParsed, NuccBinaryType};
 
-const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
+use super::HEADER_SIZE;
 
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
@@ -39,15 +39,9 @@ pub struct Entry {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AnimeSongBgmParam {
     #[serde(skip)]
-    pub size: u32,
-
-    #[serde(skip)]
     pub version: u32,
 
-    pub entry_count: u16,
-
-    #[serde(skip)]
-    pub unk0: u16,
+    pub entry_count: u32,
 
     #[serde(skip)]
     pub entry_ptr: u64,
@@ -80,13 +74,10 @@ impl NuccBinaryParsed for AnimeSongBgmParam {
 impl From<&[u8]> for AnimeSongBgmParam {
     fn from(data: &[u8]) -> Self {
         let mut reader = Cursor::new(data);
-        
-        let size = reader.read_be::<u32>().unwrap();
+    
         let version = reader.read_le::<u32>().unwrap();
 
-        let entry_count = reader.read_le::<u16>().unwrap();
-        let unk0 = reader.read_le::<u16>().unwrap();
-
+        let entry_count = reader.read_le::<u32>().unwrap();
         let entry_ptr = reader.read_le::<u64>().unwrap();
 
         let mut entries = Vec::new();
@@ -118,10 +109,8 @@ impl From<&[u8]> for AnimeSongBgmParam {
         }
 
         Self {
-            size,
             version,
             entry_count,
-            unk0,
             entry_ptr,
             entries
         }
@@ -132,14 +121,10 @@ impl From<AnimeSongBgmParam> for Vec<u8> {
     fn from(mut anime_song_bgm_param: AnimeSongBgmParam) -> Self {
         let mut writer = Cursor::new(Vec::new());
 
-        anime_song_bgm_param.entry_count = anime_song_bgm_param.entries.len() as u16; // Update entry count
+        anime_song_bgm_param.entry_count = anime_song_bgm_param.entries.len() as u32; // Update entry count
 
-        writer.write_be(&anime_song_bgm_param.size).unwrap();
         writer.write_le(&1001u32).unwrap(); // Write the version
-
         writer.write_le(&anime_song_bgm_param.entry_count).unwrap();
-        writer.write_le(&anime_song_bgm_param.unk0).unwrap();
-
         writer.write_le(&8u64).unwrap(); // Write the ptr to the entries
 
         writer.write_le(&anime_song_bgm_param.entries).unwrap();
@@ -179,10 +164,6 @@ impl From<AnimeSongBgmParam> for Vec<u8> {
         for (i, entry) in anime_song_bgm_param.entries.iter_mut().enumerate() {
             entry.index = i as u32;
         }
-
-        // Go to the start of buffer and write the size
-        writer.set_position(0);
-        writer.write_be::<u32>(&((writer.get_ref().len() - 4) as u32)).unwrap();
 
         writer.into_inner()
         

@@ -50,9 +50,6 @@ pub struct Entry {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct BodAcc {
     #[serde(skip)]
-    pub size: u32,
-
-    #[serde(skip)]
     pub version: u32,
 
     pub entry_count: u32,
@@ -90,7 +87,6 @@ impl From<&[u8]> for BodAcc {
     fn from(data: &[u8]) -> Self {
         let mut reader = Cursor::new(data);
         
-        let size = reader.read_be::<u32>().unwrap();
         let version = reader.read_le::<u32>().unwrap();
 
         let entry_count = reader.read_le::<u32>().unwrap();
@@ -126,7 +122,6 @@ impl From<&[u8]> for BodAcc {
         }
 
         BodAcc {
-            size,
             version,
             entry_count,
             entry_ptr,
@@ -143,7 +138,6 @@ impl From<BodAcc> for Vec<u8> {
 
         bodacc.entry_count = bodacc.entries.len() as u32; // Update entry count
 
-        writer.write_be(&bodacc.size).unwrap();
         writer.write_le(&1000u32).unwrap(); // Write the version
 
         writer.write_le(&bodacc.entry_count).unwrap();
@@ -187,9 +181,6 @@ impl From<BodAcc> for Vec<u8> {
             write_ptr_to_string(&mut writer, &entry.accessory_location, current_offset as u64, 0x18);
         }
 
-        // Go to the start of buffer and write the size
-        writer.set_position(0);
-        writer.write_be::<u32>(&((writer.get_ref().len() - 4) as u32)).unwrap();
 
         writer.into_inner()
 

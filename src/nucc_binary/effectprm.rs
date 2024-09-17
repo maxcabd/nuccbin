@@ -24,9 +24,6 @@ pub struct Entry {
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EffectPrm {
-    #[serde(skip)]
-    pub size: u32,
-
     #[bw(calc = entries.len() as u32)]
     pub entry_count: u32,
 

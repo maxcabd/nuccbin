@@ -29,9 +29,6 @@ pub struct Entry { // param entry, looks like each entry is 0x24 bytes? sometime
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Anmofs {
-    #[brw(big)]
-    pub size: u32,
-
     #[br(map = |x: Vec<u8>| String::from_utf8_lossy(&x).trim_end_matches('\u{0}').to_string(), count = ANM_STR_LEN)] // Need to trim the null bytes
     #[bw(map = |x: &String| (x.clone() + String::from('\u{0}').repeat(ANM_STR_LEN - x.len()).as_str()).into_bytes())]
     pub anm_name: String,

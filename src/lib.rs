@@ -4,6 +4,7 @@ use regex::Regex;
 pub mod args;
 pub mod nucc_binary;
 
+
 #[derive(Debug, Copy, Clone, EnumString, EnumIter, Display, PartialEq, Hash, Eq)]
 pub enum NuccBinaryType {
     AccessoriesParam,
@@ -25,6 +26,7 @@ pub enum NuccBinaryType {
     DlcInfoParam,
     EffectPrm,
     Ev,
+    EvSpl,
     FinalSpSkillCutIn,
     Lua,
     MessageInfo,
@@ -67,6 +69,7 @@ impl NuccBinaryType {
             NuccBinaryType::DlcInfoParam => { Regex::new(r"(DlcInfoParam\.bin)$").unwrap() },
             NuccBinaryType::EffectPrm => { Regex::new(r"(effectprm.*\.bin)$").unwrap() },
             NuccBinaryType::Ev => { Regex::new(r"(_ev.bin)").unwrap() },
+            NuccBinaryType::EvSpl => { Regex::new(r"(_ev_spl\.bin)").unwrap() },
             NuccBinaryType::FinalSpSkillCutIn => { Regex::new(r"(finalSpSkillCutIn\.bin)$").unwrap() },
             NuccBinaryType::Lua => { Regex::new(r"(\.lua)$").unwrap() },
             NuccBinaryType::MessageInfo => { Regex::new(r"(messageInfo\.bin)$").unwrap() },

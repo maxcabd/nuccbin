@@ -5,7 +5,7 @@ use serde::{Serialize, Deserialize};
 
 use super::{NuccBinaryParsed, NuccBinaryType};
 
-const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
+use super::HEADER_SIZE;
 
 // Format reversed by Portable Productions (https://www.youtube.com/@PortableProductions)
 #[binrw]
@@ -89,9 +89,6 @@ pub struct Entry {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct OugiFinishParam {
     #[serde(skip)]
-    pub size: u32,
-
-    #[serde(skip)]
     pub version: u32,
 
     pub entry_count: u32,
@@ -128,7 +125,6 @@ impl From<&[u8]> for OugiFinishParam {
     fn from(data: &[u8]) -> Self {
         let mut reader = Cursor::new(data);
         
-        let size = reader.read_be::<u32>().unwrap();
         let version = reader.read_le::<u32>().unwrap();
         let entry_count = reader.read_le::<u32>().unwrap();
         let entry_ptr = reader.read_le::<u64>().unwrap();
@@ -143,8 +139,6 @@ impl From<&[u8]> for OugiFinishParam {
 
         fn read_string_from_ptr(reader: &mut Cursor<&[u8]>, ptr: u64, curent_offset: u64) -> String {
             // If the pointer is not 0 or -1, read the string from the pointer
-
-  
             if ptr != 0 && ptr < 100 && ptr != 0xffffffff as u64 {
                 reader.seek(SeekFrom::Start(curent_offset as u64)).unwrap();
                 reader.seek(SeekFrom::Current(ptr as i64)).unwrap();
@@ -171,7 +165,6 @@ impl From<&[u8]> for OugiFinishParam {
         }
 
         Self {
-            size,
             version,
             entry_count,
             entry_ptr,
@@ -187,7 +180,6 @@ impl From<OugiFinishParam> for Vec<u8> {
 
         ougi_finish_param.entry_count = ougi_finish_param.entries.len() as u32; // Update entry count
 
-        writer.write_be(&ougi_finish_param.size).unwrap();
         writer.write_le(&1000u32).unwrap(); // Write the version
 
         writer.write_le(&ougi_finish_param.entry_count).unwrap();
@@ -238,9 +230,7 @@ impl From<OugiFinishParam> for Vec<u8> {
             entry.index = i as u32;
         }
 
-        // Go to the start of buffer and write the size
-        writer.set_position(0);
-        writer.write_be::<u32>(&((writer.get_ref().len() - 4) as u32)).unwrap();
+   
 
         writer.into_inner()
 

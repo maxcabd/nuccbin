@@ -4,7 +4,7 @@ use serde::{Serialize, Deserialize};
 
 use super::{NuccBinaryParsed, NuccBinaryType};
 
-const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
+use super::HEADER_SIZE;
 
 // Format reversed by Portable Productions (https://www.youtube.com/@PortableProductions)
 
@@ -25,15 +25,9 @@ pub struct Entry {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ProhibitedSubstringParam {
     #[serde(skip)]
-    pub size: u32,
-
-    #[serde(skip)]
     pub version: u32,
 
-    pub entry_count: u16,
-
-    #[serde(skip)]
-    pub unk0: u16,
+    pub entry_count: u32,
 
     #[serde(skip)]
     pub entry_ptr: u64,
@@ -68,12 +62,9 @@ impl From<&[u8]> for ProhibitedSubstringParam {
     fn from(data: &[u8]) -> Self {
         let mut reader = Cursor::new(data);
         
-        let size = reader.read_be::<u32>().unwrap();
+
         let version = reader.read_le::<u32>().unwrap();
-
-        let entry_count = reader.read_le::<u16>().unwrap();
-        let unk0 = reader.read_le::<u16>().unwrap();
-
+        let entry_count = reader.read_le::<u32>().unwrap();
         let entry_ptr = reader.read_le::<u64>().unwrap();
 
         let mut entries = Vec::new();
@@ -103,10 +94,8 @@ impl From<&[u8]> for ProhibitedSubstringParam {
         }
 
         Self {
-            size,
             version,
             entry_count,
-            unk0,
             entry_ptr,
             entries
         }
@@ -118,14 +107,10 @@ impl From<ProhibitedSubstringParam> for Vec<u8> {
         // Consumes the deserialized version and returns the bytes
         let mut writer = Cursor::new(Vec::new());
 
-        prohibited_substring_param.entry_count = prohibited_substring_param.entries.len() as u16; // Update entry count
+        prohibited_substring_param.entry_count = prohibited_substring_param.entries.len() as u32; // Update entry count
 
-        writer.write_be(&prohibited_substring_param.size).unwrap();
         writer.write_le(&1000u32).unwrap(); // Write the version
-
         writer.write_le(&prohibited_substring_param.entry_count).unwrap();
-        writer.write_le(&prohibited_substring_param.unk0).unwrap();
-
         writer.write_le(&8u64).unwrap(); // Write the ptr to the entries
 
         writer.write_le(&prohibited_substring_param.entries).unwrap();
@@ -160,8 +145,7 @@ impl From<ProhibitedSubstringParam> for Vec<u8> {
             write_ptr_to_string(&mut writer, &entry.substring, current_offset as u64, 0x0);
         }
 
-        writer.set_position(0);
-        writer.write_be::<u32>(&((writer.get_ref().len() - 4) as u32)).unwrap();
+ 
         
         writer.into_inner()
     }   

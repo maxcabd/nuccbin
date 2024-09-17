@@ -4,7 +4,7 @@ use serde::{Serialize, Deserialize};
 
 use super::{NuccBinaryParsed, NuccBinaryType};
 
-const HEADER_SIZE: usize = 0x14; // Size of NUCC Binary headers
+use super::HEADER_SIZE;
 
 // Format reversed by Portable Productions (https://www.youtube.com/@PortableProductions)
 #[binrw]
@@ -136,9 +136,6 @@ pub struct Entry {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DictionaryCharacterParam {
     #[serde(skip)]
-    pub size: u32,
-
-    #[serde(skip)]
     pub version: u32,
 
     pub entry_count: u32,
@@ -175,7 +172,6 @@ impl From<&[u8]> for DictionaryCharacterParam {
     fn from(data: &[u8]) -> Self {
         let mut reader = Cursor::new(data);
         
-        let size = reader.read_be::<u32>().unwrap();
         let version = reader.read_le::<u32>().unwrap();
         let entry_count = reader.read_le::<u32>().unwrap();
         let entry_ptr = reader.read_le::<u64>().unwrap();
@@ -224,7 +220,6 @@ impl From<&[u8]> for DictionaryCharacterParam {
         }
 
         Self {
-            size,
             version,
             entry_count,
             entry_ptr,
@@ -240,7 +235,6 @@ impl From<DictionaryCharacterParam> for Vec<u8> {
 
         dictionary_character_param.entry_count = dictionary_character_param.entries.len() as u32; // Update entry count
 
-        writer.write_be(&dictionary_character_param.size).unwrap();
         writer.write_le(&1000u32).unwrap(); // Write the version
 
         writer.write_le(&dictionary_character_param.entry_count).unwrap();
@@ -294,10 +288,7 @@ impl From<DictionaryCharacterParam> for Vec<u8> {
             write_ptr_to_string(&mut writer, &entry.additional_link3, current_offset as u64, 0x128);
         }
 
-        // Go to the start of buffer and write the size
-        writer.set_position(0);
-        writer.write_be::<u32>(&((writer.get_ref().len() - 4) as u32)).unwrap();
-
+    
         writer.into_inner()
 
     }

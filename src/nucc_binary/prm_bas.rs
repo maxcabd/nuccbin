@@ -34,10 +34,6 @@ pub struct VecString {
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PrmBas {
-    #[serde(skip)]
-    pub size: u32,
-
-
     pub entry: Entry
 }
 

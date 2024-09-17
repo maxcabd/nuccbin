@@ -16,10 +16,9 @@ pub struct Entry {
     pub unk0: i16,
     pub volume: f32,
 
+    #[brw(pad_after = 0x4)]
     pub pitch: i16,
-    pub unk2: i16,
-
-    pub unk3: i16,
+    
     pub timing: i16,
 
     pub unk4: f32,
@@ -41,13 +40,13 @@ pub struct Entry {
     pub bone: String,
 
 
-    pub unk6: u32,
-    pub unk7: u32,
-    pub unk8: u32,
+    #[brw(pad_after = 0x4)]
+    pub unk6: i32, 
+    pub unk8: i32,
 
-    pub unk9: u32,
+    pub unk9: i32,
 
-    pub unk10: u32,
+    pub unk10: i32,
 
     #[br(map = |x: Vec<u8>| String::from_utf8_lossy(&x).trim_end_matches('\u{0}').to_string(), count = STR_LEN)]
     #[bw(map = |x: &String| (x.clone() + String::from('\u{0}').repeat(STR_LEN - x.len()).as_str()).into_bytes())]
@@ -57,9 +56,6 @@ pub struct Entry {
 #[binrw]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Ev {
-    #[serde(skip)]
-    pub size: u32,
-
     #[bw(calc = self.entries.len() as u16)]
     pub entry_count: u16,
 
